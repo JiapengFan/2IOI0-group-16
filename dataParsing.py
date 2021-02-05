@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import datetime as dt
 
 # Parse csv into dataframe
@@ -6,15 +7,19 @@ df_2012 = pd.read_csv('.\data\BPI2012Test.csv')
 df_Italy = pd.read_csv('.\data\BPI2012Test.csv')
 
 # Parse time zone if there are any
-def convertTimezone(x):
+def convertToUnix(x):
+    # If there is a timezone in the timestamp
     if 'T' in x: 
+        # Remove the T
         without_timezone = x[:10] + ' ' + x[11:-6]
 
+        # Parse milliseconds if contained
         if '.' in x:
             without_timezone_unix = dt.datetime.timestamp(dt.datetime.strptime(without_timezone, "%Y-%m-%d %H:%M:%S.%f"))
         else:
             without_timezone_unix = dt.datetime.timestamp(dt.datetime.strptime(without_timezone, "%Y-%m-%d %H:%M:%S"))
 
+        # Add timezone or remove
         if (x[-6]=='+'):
             wholesomeTime = without_timezone_unix + int(x[-5:-3]) * 3600 + int(x[-2:]) * 60
         else:
@@ -29,8 +34,8 @@ def convertTimezone(x):
     return wholesomeTime
 
 # Convert event and reg timestamp into unix time
-df_2012['unix_event_time'] = df_2012['event time:timestamp'].apply(lambda x: convertTimezone(x))
-df_2012['unix_reg_time'] = df_2012['case REG_DATE'].apply(lambda x: convertTimezone(x))
+df_2012['unix_event_time'] = df_2012['event time:timestamp'].apply(lambda x: convertToUnix(x))
+df_2012['unix_reg_time'] = df_2012['case REG_DATE'].apply(lambda x: convertToUnix(x))
 
 # Group data set by case ID 
 df_2012_grouped_by_case = df_2012.groupby(by=['case concept:name'])
