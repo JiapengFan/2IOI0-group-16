@@ -8,21 +8,32 @@ df_Italy = pd.read_csv('.\data\BPI2012Test.csv')
 # Parse data
 (df_2012, df_2012_last_event_per_case) = parseData(df_2012)
 
+# Function that naively predicts the avereage time that each case takes in days
+
+
+def naiveAverageTimeOfCasePredictor(dataSet_last_event_per_case):
+
+    # Create a safe working copy of the input dataset
+    df_prediction_temp = dataSet_last_event_per_case.copy()
+
+    # Convert relative time in seconds to relative time in days
+    prediction_time_of_case = df_prediction_temp['unix_rel_event_time'].mean(
+    ) / 3600 / 24
+
+    return prediction_time_of_case
+
+
 # Function that naively predicts the time till the next event
-
-
 def naiveTimeToNextEventPredictor(dataSet_last_event_per_case):
 
-    # PredictionTime in sec
-    PredictionTime = dataSet_last_event_per_case['unix_rel_event_time'].mean()
+    # Create a safe working copy of the input dataset
+    df_prediction_temp = dataSet_last_event_per_case.copy()
 
-    # PredictionTime in hours
-    PredictionTimeHours = PredictionTime / 3600
+    # Add a new column which is the time between the last event and the first event divided by the number of events that took place
+    df_prediction_temp['timeToNextEvent'] = df_prediction_temp['unix_rel_event_time'] / \
+        df_prediction_temp['num_events']
 
-    # PredictionTime in days
-    PredictionTimeDays = PredictionTimeHours / 24
-
-    return PredictionTimeDays
+    return df_prediction_temp
 
 
 # Function to naively predict the next event
@@ -88,5 +99,6 @@ def naiveNextEventPredictor(dataSet):
     return(df_predicted_next_event)
 
 
-print(naiveTimeToNextEventPredictor(df_2012_last_event_per_case))
+print(naiveTimeToNextEventPredictor(df_2012_last_event_per_case).head(20))
 print(naiveNextEventPredictor(df_2012).head(20))
+print(naiveAverageTimeOfCasePredictor(df_2012_last_event_per_case))
