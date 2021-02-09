@@ -3,6 +3,7 @@ import numpy as np
 import datetime as dt
 
 # Function that parses the incoming data set
+# Works with data set containing the essential columns event time(stamp), case registeration date/time(stamp) and case ID.
 def parseData(dataSet):
     # Parse time zone if there are any
     def convertToUnix(x):
@@ -12,6 +13,7 @@ def parseData(dataSet):
             without_timezone = x[:10] + ' ' + x[11:-6]
 
             # Parse milliseconds if contained
+            # Unix time since 01-01-1970
             if '.' in x:
                 without_timezone_unix = dt.datetime.timestamp(dt.datetime.strptime(without_timezone, "%Y-%m-%d %H:%M:%S.%f"))
             else:
@@ -45,4 +47,4 @@ def parseData(dataSet):
     dataSet_last_event_per_case = dataSet_grouped_by_case.nth([-1])
     dataSet_last_event_per_case['num_events'] = dataSet_grouped_by_case.count().iloc[:, 0]
 
-    return (dataSet, dataSet_last_event_per_case)
+    return [dataSet, dataSet_last_event_per_case]
