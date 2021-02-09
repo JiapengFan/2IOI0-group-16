@@ -16,11 +16,15 @@ PredictionTimeHours = PredictionTime / 3600
 
 PredictionTimeDays = PredictionTimeHours / 24
 
-# hi = df_2012[~df_2012.index.isin(df_2012.groupby(by=['case concept:name']).nth(0).index)]
+print(PredictionTimeDays)
+print(PredictionTimeHours, '\n')
+print(PredictionTimeDays, '\n')
 
-# hi1 = hi['event concept:name'].value_counts()
-# print(PredictionTimeDays)
-print(data_Italy.columns)
+# DF that removed first and last event of each case
+df_2012_removed_first_last_event = df_2012[~df_2012.index.isin(df_2012.groupby(by=['case concept:name']).nth([0, -1]).index)]
 
-# print(PredictionTimeHours, '\n')
-# print(PredictionTimeDays, '\n')
+hi = df_2012.groupby(by=['case concept:name']).nth([2])
+
+hi1 = hi['event concept:name'].value_counts()
+
+print(hi['event concept:name'].unique())
