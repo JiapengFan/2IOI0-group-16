@@ -32,3 +32,11 @@ def accuracy_intervals(data, actualtime_col :str, prediction_col :str, error_mar
             
      return '{} predictions are within one error margin, {} between one and two margins off, {} are more than two error margins off'.format(correct, one_stage_off, two_plus_stages_off)
     
+def event_accuracy(data, actualtime_event :str, prediction_event :str):
+    acc = 0
+    for i in range(len(data)):
+        if data[actual_event][i] == data[predicted_event][i]:
+            acc += 1
+    
+    accuracy = acc/len(data) 
+    return accuracy
