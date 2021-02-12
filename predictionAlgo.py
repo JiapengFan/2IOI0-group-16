@@ -2,15 +2,15 @@ import pandas as pd
 from dataParsing import parseData
 
 # Convert csv into dataframe
-df_2012 = pd.read_csv('.\data\BPI2012Test.csv')
-df_Italy = pd.read_csv('.\data\BPI2012Test.csv')
+df_2012 = pd.read_csv('.\data\BPI2012Training.csv')
+df_2012_Test = pd.read_csv('.\data\BPI2012Test.csv')
 
 # Parse data
 (df_2012, df_2012_last_event_per_case) = parseData(df_2012)
+(df_2012_Test, df_2012_last_event_per_case_Test) = parseData(df_2012_Test)
+
 
 # Function that naively predicts the avereage time that each case takes in days
-
-
 def naiveAverageTimeOfCasePredictor(dataSet_last_event_per_case):
 
     # Create a safe working copy of the input dataset
@@ -37,7 +37,7 @@ def naiveTimeToNextEventPredictor(dataSet_last_event_per_case):
 
 
 # Function to naively predict the next event
-def naiveNextEventPredictor(dataSet):
+def naiveNextEventPredictor(dataSet, applyDataSet):
 
     # Create a safe working copy of the input dataset
     df_prediction_temp = dataSet.copy()
@@ -71,14 +71,27 @@ def naiveNextEventPredictor(dataSet):
         try:
             nextRow = df_predicted_next_event.iloc[index+1]
         except:
+            continue
+        else:
+            event_dictionary[row['event concept:name']
+                             ][nextRow['event concept:name']] += 1
+
+    # Sort the temporary datafrime holding the testing data to use time analysis for each dase
+    df_actual_next_event_apply_dataset = applyDataSet.sort_values(
+        by=['case concept:name']).reset_index(drop=True)
+
+    # Get the actual next events for the testing data
+    for index, row in df_actual_next_event_apply_dataset.iterrows():
+        caseID = row['case concept:name']
+        try:
+            nextRow = df_actual_next_event_apply_dataset.iloc[index+1]
+        except:
             actualNextEvent.append("nan")
             continue
         if (caseID != nextRow['case concept:name']):
             actualNextEvent.append("nan")
             continue
         else:
-            event_dictionary[row['event concept:name']
-                             ][nextRow['event concept:name']] += 1
             actualNextEvent.append(nextRow['event concept:name'])
 
     # Calculate which event is the most likely to occur after each specific event
@@ -89,16 +102,16 @@ def naiveNextEventPredictor(dataSet):
                 currentMax = event_dictionary[key][key2]
                 bestPredicitonForEvent[key] = key2
 
-    # Add the new predicted next event to the dataframe
-    df_predicted_next_event['predictedNextEvent'] = df_predicted_next_event['event concept:name'].map(
+    # Add the predicted next evet to the applyDataset dataframe
+    applyDataSet['predictedNextEvent'] = applyDataSet['event concept:name'].map(
         bestPredicitonForEvent)
 
     # Add the actual next event to the dataframe
-    df_predicted_next_event['actualNextEvent'] = actualNextEvent
+    applyDataSet['actualNextEvent'] = actualNextEvent
 
-    return(df_predicted_next_event)
+    return(applyDataSet)
 
 
 print(naiveTimeToNextEventPredictor(df_2012_last_event_per_case).head(20))
-print(naiveNextEventPredictor(df_2012).head(20))
+print(naiveNextEventPredictor(df_2012, df_2012_Test).head(20))
 print(naiveAverageTimeOfCasePredictor(df_2012_last_event_per_case))
