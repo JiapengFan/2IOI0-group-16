@@ -24,7 +24,7 @@ def accuracy_intervals(data, actualtime_col :str, prediction_col :str, error_mar
         if error < error_margin :
             correct += 1
             
-        elif error > error_margin and mse < 2*error_margin:
+        elif error > error_margin and error < 2*error_margin:
             one_stage_off += 1
             
         elif error > 2*error_margin:
