@@ -18,9 +18,7 @@ def function():
     naiveTimeToNextEventPredictor(df_2012, df_2012_Test)
     naiveAverageTimeOfCasePredictor(df_2012_last_event_per_case)
 
+starttime = timeit.default_timer()
+print("The start time is :",starttime)
 function()
-
-# starttime = timeit.default_timer()
-# print("The start time is :",starttime)
-# function()
-# print("The time difference is :", timeit.default_timer() - starttime)
+print("The time difference is :", timeit.default_timer() - starttime)
