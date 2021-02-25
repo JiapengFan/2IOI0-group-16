@@ -1,6 +1,8 @@
 import datetime as dt
 
 # Function that parses the incoming data set
+
+
 def parseData(dataSet):
     # Parse time zone if there are any
     def convertToUnix(x):
@@ -11,19 +13,11 @@ def parseData(dataSet):
 
             # Parse milliseconds if contained
             if '.' in x:
-                without_timezone_unix = dt.datetime.timestamp(
+                wholesomeTime = dt.datetime.timestamp(
                     dt.datetime.strptime(without_timezone, "%Y-%m-%d %H:%M:%S.%f"))
             else:
-                without_timezone_unix = dt.datetime.timestamp(
+                wholesomeTime = dt.datetime.timestamp(
                     dt.datetime.strptime(without_timezone, "%Y-%m-%d %H:%M:%S"))
-
-            # Add timezone or remove
-            if (x[-6] == '+'):
-                wholesomeTime = without_timezone_unix + \
-                    int(x[-5:-3]) * 3600 + int(x[-2:]) * 60 - 3600
-            else:
-                wholesomeTime = without_timezone_unix - \
-                    int(x[-5:-3]) * 3600 - int(x[-2:]) * 60 - 3600
 
         else:
             if '.' in x:

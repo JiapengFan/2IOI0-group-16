@@ -1,26 +1,40 @@
 from functions.simple_testing import confusion_matrix_time, confusion_matrix_event, MSEcalc
 from functions.predictionAlgo import naiveNextEventPredictor, naiveTimeToNextEventPredictor, naiveAverageTimeOfCasePredictor
 from functions.dataParsing import parseData
+from functions.dataSplitting import dataSplitter
 import pandas as pd
 import seaborn as sn
 import matplotlib.pyplot as plt
 
+
+# Pands option to disable scientific notation and display numeric values with 3 decimals
+pd.set_option('display.float_format', lambda x: '%.3f' % x)
+
+
 # Convert csv into dataframe
-df_2012 = pd.read_csv('.\data\BPI2012Training.csv')
-df_2012_Test = pd.read_csv('.\data\BPI2012Test.csv')
+df_training_raw = pd.read_csv('.\data\BPI2012Training.csv')
+df_test_raw = pd.read_csv('.\data\BPI2012Test.csv')
 
 # Parse data
-(df_2012, df_2012_last_event_per_case) = parseData(df_2012)
-(df_2012_Test, df_2012_last_event_per_case_Test) = parseData(df_2012_Test)
+(df_training_parsed, df_training_lastevent_parsed) = parseData(df_training_raw)
+(df_test_parsed, df_test_lastevent_parsed) = parseData(df_test_raw)
+
+# Clean and split the data into train, validation & test data
+(df_training, df_validation, df_test) = dataSplitter(
+    df_training_parsed, df_test_parsed)
+
 
 # Invoking predictors, see naming of functions for their purposes
-(dfPredictedEvent, uniqueEvents) = naiveNextEventPredictor(df_2012, df_2012_Test)
-# dfPredictedTimePerCase = naiveAverageTimeOfCasePredictor(df_2012_last_event_per_case, df_2012_last_event_per_case_Test)
-# dfPredictedTime = naiveTimeToNextEventPredictor(df_2012, df_2012_Test)
+(dfPredictedEvent, uniqueEvents) = naiveNextEventPredictor(df_training, df_test)
+
+print(dfPredictedEvent.head(50))
+# dfPredictedTimePerCase = naiveAverageTimeOfCasePredictor(df_training_last_event_per_case, df_test_lastevent_parsed)
+# dfPredictedTime = naiveTimeToNextEventPredictor(df_training, df_test)
 
 # Validation process that returns its accuracy or a df in confusion matrix format
 # mse_predicted_time_per_case = MSEcalc(dfPredictedTimePerCase, 'unix_rel_event_time', 'predictedTime') # Giving weird errors
-confusion_matrix_event(dfPredictedEvent, 'actualNextEvent', 'predictedNextEvent', uniqueEvents).to_pickle('confusion_matrix_event.pkl')  # where to save it, usually as a .pkl
+confusion_matrix_event(dfPredictedEvent, 'actualNextEvent', 'predictedNextEvent', uniqueEvents).to_pickle(
+    'confusion_matrix_event.pkl')  # where to save it, usually as a .pkl
 # Commented out because of missing column with event's actual time
 # confusion_matrix_time(dfPredictedTime, 'actualNextEvent', 'predictedNextEvent', dfPredictedTime['unix_rel_event_time'].std()).to_pickle('confusion_matrix_time.pkl')
 
