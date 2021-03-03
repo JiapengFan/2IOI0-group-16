@@ -25,9 +25,9 @@ df_test_raw = pd.read_csv('.\data\BPI2012Test.csv')
 
 
 # Invoking predictors, see naming of functions for their purposes
-(dfPredictedEvent, uniqueEvents) = naiveNextEventPredictor(df_training, df_test)
+(df_training, df_test) = naiveNextEventPredictor(df_training, df_test)
+(df_training, df_test) = naiveTimeToNextEventPredictor(df_training, df_test)
 
-print(dfPredictedEvent.head(50))
 # dfPredictedTimePerCase = naiveAverageTimeOfCasePredictor(df_training_last_event_per_case, df_test_lastevent_parsed)
 # dfPredictedTime = naiveTimeToNextEventPredictor(df_training, df_test)
 
