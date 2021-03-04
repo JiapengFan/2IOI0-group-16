@@ -26,8 +26,14 @@ def naiveTimeToNextEventPredictor(dataSet, applyDataSet):
     df_predicted_time_to_next_event['actual_time_to_next_event'] = df_predicted_time_to_next_event['unix_abs_event_time'].shift(
         -1) - df_predicted_time_to_next_event["unix_abs_event_time"]
 
+    applyDataSet["actual_time_to_next_event"] = applyDataSet["unix_abs_event_time"].shift(
+        -1) - applyDataSet["unix_abs_event_time"]
+
     df_predicted_time_to_next_event['actual_time_to_next_event'] = np.where((df_predicted_time_to_next_event['case concept:name'] == df_predicted_time_to_next_event['case concept:name'].shift(
         -1)), df_predicted_time_to_next_event['actual_time_to_next_event'], np.nan)
+
+    applyDataSet['actual_time_to_next_event'] = np.where((applyDataSet['case concept:name'] == applyDataSet['case concept:name'].shift(
+        -1)), applyDataSet['actual_time_to_next_event'], np.nan)
     # print(df_predicted_next_event.index.get_level_values(0))
 
     df_prediction_time_temp = df_predicted_time_to_next_event.copy()
