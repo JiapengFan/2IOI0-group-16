@@ -98,3 +98,9 @@ def predict(X_test, boom):
     new_df['predicted event'] = predictions1
 
     return new_df
+
+
+X_train, y_train = dummy_trainers(data_train)
+x_test = x_prediction(data_test)
+boom = fit_tree(X_train, y_train)
+df_predictions = predict(X_test)
