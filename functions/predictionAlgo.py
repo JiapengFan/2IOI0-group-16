@@ -55,8 +55,14 @@ def naiveNextEventPredictor(dataSet, applyDataSet):
     df_predicted_next_event['actual_next_event'] = df_predicted_next_event["event concept:name"].shift(
         -1)
 
+    applyDataSet["actual_next_event"] = applyDataSet["event concept:name"].shift(
+        -1)
+
     df_predicted_next_event['actual_next_event'] = np.where((df_predicted_next_event['case concept:name'] == df_predicted_next_event['case concept:name'].shift(
         -1)), df_predicted_next_event['actual_next_event'], np.nan)
+
+    applyDataSet['actual_next_event'] = np.where((applyDataSet['case concept:name'] == applyDataSet['case concept:name'].shift(
+        -1)), applyDataSet['actual_next_event'], np.nan)
 
     df_event_temp = df_predicted_next_event.copy()
     unique_events = df_event_temp["event concept:name"].unique()
