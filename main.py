@@ -31,6 +31,9 @@ df_test_raw = pd.read_csv('.\data\BPI2012Test.csv')
 # dfPredictedTimePerCase = naiveAverageTimeOfCasePredictor(df_training_last_event_per_case, df_test_lastevent_parsed)
 # dfPredictedTime = naiveTimeToNextEventPredictor(df_training, df_test)
 
+#prediction using the decision tree
+
+
 # Validation process that returns its accuracy or a df in confusion matrix format
 # mse_predicted_time_per_case = MSEcalc(dfPredictedTimePerCase, 'unix_rel_event_time', 'predictedTime') # Giving weird errors
 confusion_matrix_event(dfPredictedEvent, 'actualNextEvent', 'predictedNextEvent', uniqueEvents).to_pickle(

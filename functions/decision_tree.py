@@ -97,12 +97,12 @@ def fit_tree(X, y):
 
 #boom = fit_tree(x_train, y_train)
 
-def predict(X_test, data, boom):
+def tree_predict(X_test, data, boom):
     new_df = data.copy()
 
     predictions = boom.predict(X_test)
     predictions1 = np.insert(predictions, 0, 0)
-    new_df['predicted event'] = predictions1
+    new_df['predictedNextEvent'] = predictions1
 
     return new_df
 
