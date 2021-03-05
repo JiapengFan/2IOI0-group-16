@@ -119,3 +119,32 @@ def tree_predict(X_test, data, boom):
 #x_test = x_prediction(data_test)
 #boom = fit_tree(X_train, y_train)
 #df_predictions = predict(X_test)
+
+def tree_parameters(X, y):
+    X = np.array(X)
+
+    std_slc = StandardScaler()
+    pca = decomposition.PCA()
+    dec_tree = tree.DecisionTreeClassifier()
+
+    pipe = Pipeline(steps=[('std_slc', std_slc),
+                           ('pca', pca),
+                           ('dec_tree', dec_tree)])
+
+    n_components = list(range(1, X.shape[1] + 1, 1))
+
+    criterion = ['gini', 'entropy']
+    max_depth = [2, 4, 6, 8, 10, 12, 14, 16]
+
+    parameters = dict(pca__n_components=n_components,
+                      dec_tree__criterion=criterion,
+                      dec_tree__max_depth=max_depth)
+
+    clf_GS = GridSearchCV(pipe, parameters)
+    clf_GS.fit(X, y)
+
+    print('Best Criterion:', clf_GS.best_estimator_.get_params()['dec_tree__criterion'])
+    print('Best max_depth:', clf_GS.best_estimator_.get_params()['dec_tree__max_depth'])
+    print('Best Number Of Components:', clf_GS.best_estimator_.get_params()['pca__n_components'])
+    print();
+    print(clf_GS.best_estimator_.get_params()['dec_tree'])
