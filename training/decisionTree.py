@@ -13,6 +13,12 @@ def dummy_variables(df):
 
     return df_dummy
 
+def quick_dummy(dataSet, attr):
+    one_hot = pd.get_dummies(dataSet[attr])
+    df = dataSet.join(one_hot)
+
+    return (df)
+
 def dummy_trainers(dummy_data):
     x1 = dummy_data['A_PARTLYSUBMITTED'][:-1]
     x2 = dummy_data['A_PREACCEPTED'][:-1]
