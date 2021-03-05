@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
 from sklearn import tree
+from sklearn import decomposition, datasets
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import StandardScaler
 
 def dummy_variables(df):
     df_dummy = df
