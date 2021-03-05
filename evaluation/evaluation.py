@@ -39,34 +39,3 @@ def confusion_matrix_time(data, actualtime_col :str, prediction_col :str, error_
     df = pd.DataFrame(df)
     
     return df
-        
-
-def event_accuracy(data, actualtime_event :str, prediction_event :str):
-    acc = 0
-    for i in range(len(data)):
-        if data[actualtime_event][i] == data[prediction_event][i]:
-            acc += 1
-    
-    accuracy = acc/len(data) 
-    return accuracy
-
-def confusion_matrix_event(data, actual_col :str, prediction_col :str, events):
-    df = {}
-
-    for actual_event in events:
-        predicted_list = [0]*len(events)
-        for row in range(len(data)):
-            for idx, predicted_event in enumerate(events):
-                if (data[prediction_col][row] == predicted_event) and (data[actual_col][row] == actual_event) and (data[actual_col][row] == data[prediction_col][row]):
-                    predicted_list[idx]+=1
-        df[actual_event] = predicted_list
-    df = pd.DataFrame(df)
-
-    indices = {}
-
-    for x in range(0, len(events)):
-        indices[x] = events[x]
-    
-    df.rename(index = indices, inplace=True)
-
-    return df
