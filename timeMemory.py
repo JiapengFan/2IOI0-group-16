@@ -33,7 +33,7 @@ def function():
     df_Predictions = tree_predict(X_test, df_test, decision_boom)
 
 
-#starttime = timeit.default_timer()
-#print("The start time is :",starttime)
+starttime = timeit.default_timer()
+print("The start time is :",starttime)
 function()
-#print("The time difference is :", timeit.default_timer() - starttime)
+print("The time difference is :", timeit.default_timer() - starttime)

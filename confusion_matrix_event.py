@@ -2,11 +2,14 @@ import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from tabulate import tabulate
+from IPython.display import display, HTML
 from testing.testing_events import confusion_matrix_event
 from training.predictionAlgo import naiveNextEventPredictor
 from preprocessing.dataParsing import parseData
 from preprocessing.dataSplitting import dataSplitter
 from training.decisionTree import dummy_trainers, x_prediction, fit_tree, tree_predict, quick_dummy
+from streamlit import components
 
 
 # Convert csv into dataframe
@@ -51,8 +54,15 @@ confusion_matrix_event = confusion_matrix_event(actual_array, predicted_array, u
 
 # Plot confusion matrix
 #confusion_matrix = pd.crosstab(confusion_matrix_event[uniqueEvents], confusion_matrix_event[uniqueEvents])
-sns.heatmap(confusion_matrix_event)
-plt.show()
+
+#confusion matrix with color
+#sns.heatmap(confusion_matrix_event)
+#plt.show()
+
+#confusion matrix table
+#confusion_matrix_event.to_csv('.\data\Confusion_matrix_sprint2.csv')
+display(HTML(confusion_matrix_event.style.render()))
+
 
 #plt.pcolor(confusion_matrix_event)
 #plt.yticks(np.arange(0.5, len(confusion_matrix_event.index), 1), confusion_matrix_event.index)
