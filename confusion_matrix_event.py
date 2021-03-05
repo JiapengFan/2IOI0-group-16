@@ -29,7 +29,7 @@ df_2012_Test = pd.read_csv('.\data\BPI2012Test.csv')
 #(df_2012_test, df_2012_last_event_per_case_test) = parseData(df_test)
 
 # Predict next event using naive predictor
-#(dfPredictedEvent_training, dfPredictedEvent_test) = naiveNextEventPredictor(df_2012_train, df_2012_Test)
+(dfPredictedEvent_training, dfPredictedEvent_test) = naiveNextEventPredictor(df_training, df_test)
 
 #predict using the decision tree
 df_training_dummy = quick_dummy(df_training, 'event concept:name')
@@ -56,12 +56,12 @@ confusion_matrix_event = confusion_matrix_event(actual_array, predicted_array, u
 #confusion_matrix = pd.crosstab(confusion_matrix_event[uniqueEvents], confusion_matrix_event[uniqueEvents])
 
 #confusion matrix with color
-#sns.heatmap(confusion_matrix_event)
-#plt.show()
+sns.heatmap(confusion_matrix_event)
+plt.show()
 
 #confusion matrix table
-#confusion_matrix_event.to_csv('.\data\Confusion_matrix_sprint2.csv')
-display(HTML(confusion_matrix_event.style.render()))
+#confusion_matrix_event.to_csv('.\data\Confusion_matrix_sprint2_naive.csv')
+#display(HTML(confusion_matrix_event.style.render()))
 
 
 #plt.pcolor(confusion_matrix_event)
