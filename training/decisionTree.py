@@ -44,9 +44,10 @@ def dummy_trainers(dummy_data):
     x22 = dummy_data['O_DECLINED'][:-1]
     x23 = dummy_data['W_Wijzigen contractgegevens'][:-1]
     x_time = dummy_data['unix_rel_event_time'][1:]
+    x_amount = test_data['case AMOUNT_REQ'][1:]
     y_train = dummy_data['event concept:name'][1:]
 
-    zipped = zip(x_time, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21,
+    zipped = zip(x_time, x_amount, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21,
                  x22, x23)
 
     X_train =[list(a) for a in zipped]
@@ -78,9 +79,10 @@ def x_prediction(test_data):
     x22 = test_data['O_DECLINED'][:-1]
     x23 = test_data['W_Wijzigen contractgegevens'][:-1]
     x_time = test_data['unix_rel_event_time'][1:]
+    x_amount = test_data['case AMOUNT_REQ'][1:]
     y_train = test_data['event concept:name'][1:]
 
-    zipped = zip(x_time, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21,
+    zipped = zip(x_time, x_amount, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21,
                  x22, x23)
 
     X_test = [list(a) for a in zipped]
@@ -88,7 +90,7 @@ def x_prediction(test_data):
 
 
 def fit_tree(X, y):
-    boom = tree.DecisionTreeClassifier(class_weight=None, criterion='entropy', max_depth=10,
+    boom = tree.DecisionTreeClassifier(class_weight=None, criterion='entropy', max_depth=12,
             max_features=None, max_leaf_nodes=None,
             min_impurity_decrease=0.0, min_impurity_split=None,
             min_samples_leaf=1, min_samples_split=2,

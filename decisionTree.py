@@ -17,13 +17,17 @@ pd.set_option('display.float_format', lambda x: '%.3f' % x)
 df_training_raw = pd.read_csv('.\data\BPI2012Training.csv')
 df_test_raw = pd.read_csv('.\data\BPI2012Test.csv')
 
+#parsing data
+(df_training, df_2012_last_event_per_case_train) = parseData(df_training_raw)
+(df_test, df_2012_last_event_per_case_test) = parseData(df_test_raw)
+
 # Clean and split the data into train, validation & test data
-(df_training, df_validation, df_test) = dataSplitter(df_training_raw, df_test_raw)
+(df_training, df_validation, df_test) = dataSplitter(df_training, df_test)
 
 # Parse data
-(df_2012_train, df_2012_last_event_per_case_train) = parseData(df_training)
-(df_2012_val, df_2012_last_event_per_case_val) = parseData(df_validation)
-(df_2012_test, df_2012_last_event_per_case_test) = parseData(df_test)
+#(df_2012_train, df_2012_last_event_per_case_train) = parseData(df_training)
+#(df_2012_val, df_2012_last_event_per_case_val) = parseData(df_validation)
+#(df_2012_test, df_2012_last_event_per_case_test) = parseData(df_test)
 
 # Invoking predictors, see naming of functions for their purposes
 (df_training, df_test) = naiveNextEventPredictor(df_training, df_test)
