@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from sklearn import tree
 
 
 
@@ -83,24 +84,30 @@ def x_prediction(test_data):
 
 
 def fit_tree(X, y):
-    boom = tree.DecisionTreeClassifier()
+    boom = tree.DecisionTreeClassifier(class_weight=None, criterion='entropy', max_depth=10,
+            max_features=None, max_leaf_nodes=None,
+            min_impurity_decrease=0.0, min_impurity_split=None,
+            min_samples_leaf=1, min_samples_split=2,
+            min_weight_fraction_leaf=0.0, presort=False, random_state=None,
+            splitter='best')
+
     boom.fit(X, y)
 
     return boom
 
 #boom = fit_tree(x_train, y_train)
 
-def predict(X_test, boom):
-    new_df = dummy_data.copy()
+def predict(X_test, data, boom):
+    new_df = data.copy()
 
-    predictions = boom.predict(X)
+    predictions = boom.predict(X_test)
     predictions1 = np.insert(predictions, 0, 0)
     new_df['predicted event'] = predictions1
 
     return new_df
 
 
-X_train, y_train = dummy_trainers(data_train)
-x_test = x_prediction(data_test)
-boom = fit_tree(X_train, y_train)
-df_predictions = predict(X_test)
+#X_train, y_train = dummy_trainers(data_train)
+#x_test = x_prediction(data_test)
+#boom = fit_tree(X_train, y_train)
+#df_predictions = predict(X_test)
