@@ -1,4 +1,5 @@
-import seaborn as sn
+import seaborn as sns
+import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from testing.testing_events import confusion_matrix_event
@@ -47,8 +48,13 @@ actual_array = df_Predictions['event concept:name'][1:].to_numpy()
 #predicted_array = dfPredictedEvent_test['naive_predicted_next_event'].to_numpy()
 predicted_array = df_Predictions['predictedNextEvent'][1:].to_numpy()
 confusion_matrix_event = confusion_matrix_event(actual_array, predicted_array, uniqueEvents)
-print(confusion_matrix_event[1:10])
+
 # Plot confusion matrix
 #confusion_matrix = pd.crosstab(confusion_matrix_event[uniqueEvents], confusion_matrix_event[uniqueEvents])
-#sn.heatmap(confusion_matrix)
+sns.heatmap(confusion_matrix_event)
+plt.show()
+
+#plt.pcolor(confusion_matrix_event)
+#plt.yticks(np.arange(0.5, len(confusion_matrix_event.index), 1), confusion_matrix_event.index)
+#plt.xticks(np.arange(0.5, len(confusion_matrix_event.columns), 1), confusion_matrix_event.columns)
 #plt.show()
