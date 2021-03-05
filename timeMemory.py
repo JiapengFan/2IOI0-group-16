@@ -6,7 +6,7 @@ from training.decisionTree import dummy_trainers, x_prediction, fit_tree, tree_p
 import pandas as pd
 import timeit
 
-#@profile(precision=4) #place profile before the function, this will return memory use when running the function
+@profile(precision=4) #place profile before the function, this will return memory use when running the function
 def function():
     # Convert csv into dataframe
     df_2012 = pd.read_csv('.\data\BPI2012Training.csv')
@@ -33,7 +33,7 @@ def function():
     df_Predictions = tree_predict(X_test, df_test, decision_boom)
 
 
-starttime = timeit.default_timer()
-print("The start time is :",starttime)
+#starttime = timeit.default_timer()
+#print("The start time is :",starttime)
 function()
-print("The time difference is :", timeit.default_timer() - starttime)
+#print("The time difference is :", timeit.default_timer() - starttime)

@@ -42,13 +42,13 @@ df_Predictions = tree_predict(X_test, df_test, decision_boom)
 
 #uniqueEvents = dfPredictedEvent_test['actual_next_event'].unique()
 #actual_array = dfPredictedEvent_test['actual_next_event'].to_numpy()
-uniqueEvents = df_Predictions['event concept:name'][1:].unique()
+uniqueEvents = df_Predictions['event concept:name'].unique()
 actual_array = df_Predictions['event concept:name'][1:].to_numpy()
 #predicted_array = dfPredictedEvent_test['naive_predicted_next_event'].to_numpy()
 predicted_array = df_Predictions['predictedNextEvent'][1:].to_numpy()
 confusion_matrix_event = confusion_matrix_event(actual_array, predicted_array, uniqueEvents)
-
+print(confusion_matrix_event[1:10])
 # Plot confusion matrix
-confusion_matrix = pd.crosstab(confusion_matrix_event[uniqueEvents], confusion_matrix_event[uniqueEvents])
-sn.heatmap(confusion_matrix)
-plt.show()
+#confusion_matrix = pd.crosstab(confusion_matrix_event[uniqueEvents], confusion_matrix_event[uniqueEvents])
+#sn.heatmap(confusion_matrix)
+#plt.show()
