@@ -42,9 +42,10 @@ def dummy_trainers(dummy_data):
     x20 = dummy_data['A_ACTIVATED'][:-1]
     x21 = dummy_data['A_REGISTERED'][:-1]
     x22 = dummy_data['O_DECLINED'][:-1]
-    x23 = dummy_data['W_Wijzigen contractgegevens'][:-1]
+    x23 = dummy_data['A_SUBMITTED'][:-1]
+    #x23 = dummy_data['W_Wijzigen contractgegevens'][:-1]
     x_time = dummy_data['unix_rel_event_time'][1:]
-    x_amount = test_data['case AMOUNT_REQ'][1:]
+    x_amount = dummy_data['case AMOUNT_REQ'][1:]
     y_train = dummy_data['event concept:name'][1:]
 
     zipped = zip(x_time, x_amount, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15, x16, x17, x18, x19, x20, x21,
@@ -77,7 +78,8 @@ def x_prediction(test_data):
     x20 = test_data['A_ACTIVATED'][:-1]
     x21 = test_data['A_REGISTERED'][:-1]
     x22 = test_data['O_DECLINED'][:-1]
-    x23 = test_data['W_Wijzigen contractgegevens'][:-1]
+    x23 = test_data['A_SUBMITTED'][:-1]
+    #x23 = test_data['W_Wijzigen contractgegevens'][:-1]
     x_time = test_data['unix_rel_event_time'][1:]
     x_amount = test_data['case AMOUNT_REQ'][1:]
     y_train = test_data['event concept:name'][1:]
@@ -94,8 +96,8 @@ def fit_tree(X, y):
             max_features=None, max_leaf_nodes=None,
             min_impurity_decrease=0.0, min_impurity_split=None,
             min_samples_leaf=1, min_samples_split=2,
-            min_weight_fraction_leaf=0.0, presort=False, random_state=None,
-            splitter='best')
+            min_weight_fraction_leaf=0.0, random_state=None,
+            splitter='best') #presort=Flase appearantly an unexpected argument
 
     boom.fit(X, y)
 

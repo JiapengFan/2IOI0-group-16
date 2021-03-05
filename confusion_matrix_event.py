@@ -11,13 +11,17 @@ from preprocessing.dataSplitting import dataSplitter
 df_2012 = pd.read_csv('.\data\BPI2012Training.csv')
 df_2012_Test = pd.read_csv('.\data\BPI2012Test.csv')
 
+#parse data
+(df_training, df_2012_last_event_per_case_train) = parseData(df_training_raw)
+(df_test, df_2012_last_event_per_case_test) = parseData(df_test_raw)
+
 # Clean and split the data into train, validation & test data
-(df_training, df_validation, df_test) = dataSplitter(df_2012, df_2012_Test)
+(df_training, df_validation, df_test) = dataSplitter(df_training, df_test)
 
 # Parse data
-(df_2012_train, df_2012_last_event_per_case_train) = parseData(df_training)
-(df_2012_val, df_2012_last_event_per_case_val) = parseData(df_validation)
-(df_2012_test, df_2012_last_event_per_case_test) = parseData(df_test)
+#(df_2012_train, df_2012_last_event_per_case_train) = parseData(df_training)
+#(df_2012_val, df_2012_last_event_per_case_val) = parseData(df_validation)
+#(df_2012_test, df_2012_last_event_per_case_test) = parseData(df_test)
 
 # Predict next event using naive predictor
 (dfPredictedEvent_training, dfPredictedEvent_test) = naiveNextEventPredictor(df_2012_train, df_2012_Test)
