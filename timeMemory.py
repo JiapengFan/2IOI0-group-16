@@ -1,6 +1,6 @@
 from memory_profiler import profile # import this package
-from functions.predictionAlgo import naiveNextEventPredictor, naiveTimeToNextEventPredictor, naiveAverageTimeOfCasePredictor
-from functions.dataParsing import parseData
+from training.predictionAlgo import naiveNextEventPredictor, naiveTimeToNextEventPredictor, naiveAverageTimeOfCasePredictor
+from preprocessing.dataParsing import parseData
 import pandas as pd
 import timeit
 

@@ -5,8 +5,8 @@ from pm4py.algo.discovery.alpha import algorithm as alpha_miner
 from pm4py.visualization.petrinet import visualizer as pn_visualizer
 
 # Convert csv into dataframe
-df_2012 = pd.read_csv('.\data\BPI2012Training.csv').rename(columns={'case concept:name': 'case:concept:name', 'event concept:name': 'concept:name', 'event time:timestamp' : 'time:timestamp'})
-df_2012_Test = pd.read_csv('.\data\BPI2012Test.csv')
+df_2012 = pd.read_csv('..\.\data\BPI2012Training.csv').rename(columns={'case concept:name': 'case:concept:name', 'event concept:name': 'concept:name', 'event time:timestamp' : 'time:timestamp'})
+df_2012_Test = pd.read_csv('..\.\data\BPI2012Test.csv')
 
 # Parse data
 # (df_2012, df_2012_last_event_per_case) = parseData(df_2012)
