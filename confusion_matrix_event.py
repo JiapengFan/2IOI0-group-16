@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from testing.testing_events import confusion_matrix_event
 from training.predictionAlgo import naiveNextEventPredictor
-from preprocessing.dataParsing import parseData, dataSplitter
+from preprocessing.dataParsing import parseData
+from preprocessing.dataSplitting import dataSplitter
+
 
 # Convert csv into dataframe
 df_2012 = pd.read_csv('.\data\BPI2012Training.csv')

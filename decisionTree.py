@@ -41,8 +41,8 @@ df_validation_dummy = quick_dummy(df_validation, 'event concept:name')
 X_train, y_train = dummy_trainers(df_training_dummy) #current df_training doenst contain dummy variables yet
 X_validation = x_prediction(df_validation_dummy)
 X_test = x_prediction(df_test_dummy)
-decision_tree = fit_tree(X_train, y_train)
-df_Predictions = tree_predict(X_test, df_test, decision_tree)
+decision_boom = fit_tree(X_train, y_train)
+df_Predictions = tree_predict(X_test, df_test, decision_boom)
 
 print(df_Predictions)
 
