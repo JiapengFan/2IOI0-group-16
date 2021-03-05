@@ -50,8 +50,4 @@ confusion_matrix_event = pd.read_pickle('confusion_matrix_event.pkl')
 # See reason why above is commented out
 # confusion_matrix_time = pd.read_pickle('confusion_matrix_time.pkl')
 
-# # Plot confusion matrix
-# cols = confusion_matrix_event.columns
-# confusion_matrix = pd.crosstab(confusion_matrix_event[cols], confusion_matrix_event[cols])
-# sn.heatmap(confusion_matrix)
-# plt.show()
+
