@@ -32,7 +32,11 @@ df_test_raw = pd.read_csv('.\data\BPI2012Test.csv')
 # dfPredictedTime = naiveTimeToNextEventPredictor(df_training, df_test)
 
 #prediction using the decision tree
-
+X_train, y_train = dummy_trainers(df_training) #current df_training doenst contain dummy variables yet
+X_validation = x_prediction(df_validation)
+X_test = x_prediction(data_test)
+decision_tree = fit_tree(X_train, y_train)
+df_Predictions = tree_predict(X_test, df_test, decision_tree)
 
 # Validation process that returns its accuracy or a df in confusion matrix format
 # mse_predicted_time_per_case = MSEcalc(dfPredictedTimePerCase, 'unix_rel_event_time', 'predictedTime') # Giving weird errors
