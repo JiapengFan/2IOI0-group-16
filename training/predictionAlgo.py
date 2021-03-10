@@ -23,6 +23,9 @@ def naiveTimeToNextEventPredictor(dataSet, applyDataSet):
     df_predicted_time_to_next_event = dataSet.copy().sort_values(
         by=['case concept:name', "eventID ", "unix_abs_event_time"])
 
+    applyDataSet.sort_values(
+        by=["case concept:name", "eventID ", "unix_abs_event_time"], inplace=True)
+
     df_predicted_time_to_next_event['actual_time_to_next_event'] = df_predicted_time_to_next_event['unix_abs_event_time'].shift(
         -1) - df_predicted_time_to_next_event["unix_abs_event_time"]
 
@@ -39,6 +42,8 @@ def naiveTimeToNextEventPredictor(dataSet, applyDataSet):
     df_prediction_time_temp = df_predicted_time_to_next_event.copy()
     df_prediction_time_temp_grouped = df_prediction_time_temp.groupby(
         by="event concept:name").mean()["actual_time_to_next_event"]
+
+    # rint(df_prediction_time_temp_grouped.head(50))
 
     df_prediction_time_temp['naive_predicted_time_to_next_event'] = df_prediction_time_temp['event concept:name'].map(
         df_prediction_time_temp_grouped)
@@ -57,6 +62,9 @@ def naiveNextEventPredictor(dataSet, applyDataSet):
 
     df_predicted_next_event = dataSet.copy().sort_values(
         by=['case concept:name', "eventID ", "unix_abs_event_time"])
+
+    applyDataSet.sort_values(
+        by=["case concept:name", "eventID ", "unix_abs_event_time"], inplace=True)
 
     df_predicted_next_event['actual_next_event'] = df_predicted_next_event["event concept:name"].shift(
         -1)
