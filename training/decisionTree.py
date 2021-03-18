@@ -6,6 +6,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import StandardScaler
 
+#this is an old function use the quick dummy one
 def dummy_variables(df):
     df_dummy = df
 
