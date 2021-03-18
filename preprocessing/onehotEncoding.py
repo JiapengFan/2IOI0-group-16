@@ -1,15 +1,3 @@
-from sklearn.preprocessing import OneHotEncoder
-
-def fitOnehot(unique_events):
-    '''
-    fit one-hot mapping.
-    '''
-
-    onehot_encoder = OneHotEncoder(sparse=False)
-    onehot_encoder = onehot_encoder.fit(unique_events)
-
-    return onehot_encoder
-
 def convertToOnehot(events_array, onehot_encoder):
     '''
     Returns one-hot encoded events.
@@ -22,7 +10,6 @@ def convertToOnehot(events_array, onehot_encoder):
     label_encoder <class: 'sklearn.preprocessing.LabelEncoder'>: Mapping that will later be used to convert one-hot encoded events back to events in string.
     '''
 
-    onehot_encoder = OneHotEncoder(sparse=False)
     onehot_encoded = onehot_encoder.transform(events_array)
 
     return onehot_encoded
