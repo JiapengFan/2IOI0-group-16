@@ -1,31 +1,25 @@
-def lstmTimePredictor(trainDataset, testDataset):
+# Import the libraries
+import tensorflow as tf
+import math
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+from keras.models import Sequential
+from keras.layers import Dense, LSTM
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.model_selection import train_test_split
+from keras.layers import Dropout
+from keras.layers.advanced_activations import LeakyReLU
+import datetime as dt
 
-    # Import the libraries
-    import tensorflow as tf
-    tf.test.gpu_device_name()
+def lstmTimePredictor():
 
-    import math
-    import numpy as np
-    import pandas as pd
-    from sklearn.preprocessing import MinMaxScaler
-    from keras.models import Sequential
-    from keras.layers import Dense, LSTM
-    import matplotlib.pyplot as plt
-    from sklearn.preprocessing import LabelEncoder
-    from sklearn.preprocessing import OneHotEncoder
-    from sklearn.model_selection import train_test_split
-    plt.style.use('fivethirtyeight')
-
-    # features = (np.random.randint(10, size=(100, 1)))
-    # print(features.shape)
-
-    df_training = pd.read_csv('/content/BPI2012Training.csv')
-    df_test = pd.read_csv('/content/BPI2012Test.csv')
-
-    import datetime as dt
+    df_training = pd.read_csv('../data/BPI2012Training.csv')
+    df_test = pd.read_csv('../data/BPI2012Test.csv')
 
     # Function that parses the incoming data set
-
     def parseData(dataSet):
         # Parse time zone if there are any
         def convertToUnix(x):
@@ -95,7 +89,6 @@ def lstmTimePredictor(trainDataset, testDataset):
     def eventDay(dataSet):
         dataSet["day"] = pd.to_datetime(dataSet["event time:timestamp"]).dt.day
 
-    df_training = parseData(trainingDataset)
     eventStartHour(df_training[0])
     eventDay(df_training[0])
     df_training = timeToNextEvent(df_training[0])
@@ -104,7 +97,6 @@ def lstmTimePredictor(trainDataset, testDataset):
     df_training["actual_time_to_next_event"] = np.where((np.isnan(
         df_training["actual_time_to_next_event"])), 0, df_training["actual_time_to_next_event"])
 
-    df_test = parseData(testDataset)
     eventStartHour(df_test[0])
     eventDay(df_test[0])
     df_test = timeToNextEvent(df_test[0])
@@ -113,7 +105,7 @@ def lstmTimePredictor(trainDataset, testDataset):
     df_test["actual_time_to_next_event"] = np.where((np.isnan(
         df_test["actual_time_to_next_event"])), 0, df_test["actual_time_to_next_event"])
 
-    f_test["W_Wijzigen contractgegevens"] = 0
+    df_test["W_Wijzigen contractgegevens"] = 0
 
     def quick(fini):
         fini["no_event"] = 0
@@ -163,9 +155,6 @@ def lstmTimePredictor(trainDataset, testDataset):
     x_test = np.reshape(
         x_test, (x_test.shape[0], x_test.shape[2], x_test.shape[1]))
 
-    from keras.layers import Dropout
-    from keras.layers.advanced_activations import LeakyReLU
-
     # Initialising the RNN
     model = Sequential()
 
@@ -197,32 +186,3 @@ def lstmTimePredictor(trainDataset, testDataset):
     # compile and fit the model on 30 epochs
     model.compile(optimizer='adam', loss='mean_absolute_error')
     model.fit(x_train, y_train, epochs=10, batch_size=50, verbose=2)
-
-    predictions = model.predict(x_test)
-    # print(predictions[0])
-    predictions = scalerTestSingle.inverse_transform(predictions)
-    # print(predictions[0])
-    y_test_unscaled = scalerTestSingle.inverse_transform([y_test])
-
-    sum = 0
-    for x in range(0, len(y_test)):
-        sum += ((predictions[x][0] - y_test_unscaled[0][x])**2)
-
-    print(np.sqrt(sum))
-
-    quickarr = []
-    for x in predictions:
-        quickarr.append(x[0])
-
-    testDataset['lstmTime'] = quickarr
-
-    # print(predictions[0][0])
-    # print(y_test[0][0])
-    # print(predictions[1][0])
-    # print(y_test[0][1])
-    # print(predictions[5][0])
-    # print(y_test[0][5])
-    # print(predictions[100][0])
-    # print(y_test[0][100])
-
-    return testDataset
