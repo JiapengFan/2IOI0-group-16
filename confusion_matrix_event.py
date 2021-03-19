@@ -9,7 +9,7 @@ from training.predictionAlgo import naiveNextEventPredictor
 from preprocessing.dataParsing import parseData
 from preprocessing.dataSplitting import dataSplitter
 from training.decisionTree import dummy_trainers, x_prediction, fit_tree, tree_predict, quick_dummy
-from streamlit import components
+# from streamlit import components
 
 
 # Convert csv into dataframe
