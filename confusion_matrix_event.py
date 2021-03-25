@@ -56,7 +56,10 @@ confusion_matrix_event = confusion_matrix_event(actual_array, predicted_array, u
 #confusion_matrix = pd.crosstab(confusion_matrix_event[uniqueEvents], confusion_matrix_event[uniqueEvents])
 
 #confusion matrix with color
-sns.heatmap(confusion_matrix_event, cmap = 'Reds')
+#sns.heatmap(confusion_matrix_event, cmap = 'Reds')
+plt.pcolor(confusion_matrix_event, cmap='Reds')
+plt.yticks(np.arange(len(confusion_matrix_event)), confusion_matrix_event.index)
+plt.xticks(np.arange(len(confusion_matrix_event)), confusion_matrix_event.columns, rotation = 90)
 plt.show()
 
 #confusion matrix table
