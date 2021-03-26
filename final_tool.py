@@ -1,15 +1,21 @@
+
+import pandas as pd
+import numpy as np
+from preprocessing.dataParsing import parseData
+from preprocessing.dataSplitting import dataSplitter
 import tkinter as tk
 from tkinter import *
+from LSTM.lstmPrediction import LSTMEvent
 
 def User_inputGUI():
     master = tk.Tk()
-    tk.Label(master, text="possible feature synonyms:").grid(row=0)
+    tk.Label(master, text="Core features:").grid(row=0)
     tk.Label(master, text="eventID").grid(row=1, column=0)
     tk.Label(master, text="event name").grid(row=1, column=1)
     tk.Label(master, text="event time").grid(row=1, column=2)
     tk.Label(master, text="case reg date").grid(row=1, column=3)
     tk.Label(master, text="").grid(row=3)
-    tk.Label(master, text="Possible extra features:").grid(row=4)
+    tk.Label(master, text="Optional extra features:").grid(row=4)
 
     e1 = tk.Entry(master)
     e2 = tk.Entry(master)
@@ -31,7 +37,7 @@ def User_inputGUI():
     base_model = StringVar(master)
     base_model.set("time and event prediction")
 
-    w = OptionMenu(master, base_model, 'event_prediction', 'time predictiom', 'time and event prediction').grid(
+    w = OptionMenu(master, base_model, 'event prediction', 'time predictiom', 'time and event prediction').grid(
         row=7, column=1)
     #w.pack()
 
@@ -42,7 +48,7 @@ def User_inputGUI():
     f1, f2, f3, f4 = e1.get(), e2.get(), e3.get(), e4.get()
 
     if f1 == "":
-        f1 = 'eventID'
+        f1 = 'case concept:name'
 
     if f2 == "":
         f2 = 'event concept:name'
@@ -58,9 +64,30 @@ def User_inputGUI():
     extra_features = [e5.get(), e6.get(), e7.get()]
     extra_features = [x for x in extra_features if x != '']
 
-    selected_model = [base_model.get()]
+    selected_model = base_model.get()
 
 
     return base_features, extra_features, selected_model
 
-User_inputGUI()
+base_features, extra_features, selected_model = User_inputGUI()
+
+if selected_model == 'event prediction':
+    # Convert csv into dataframe
+    df_training_raw = pd.read_csv('.\data\BPI2012Training.csv')
+    df_test_raw = pd.read_csv('.\data\BPI2012Test.csv')
+
+    # Parsing data
+    (df_training, df_2012_last_event_per_case_train) = parseData(df_training_raw)
+    (df_test, df_2012_last_event_per_case_test) = parseData(df_test_raw)
+
+    # Clean and split the data into train, validation & test data
+    (df_training, df_validation, df_test) = dataSplitter(df_training, df_test)
+
+    accuracy = LSTMEvent(df_training, df_validation, df_test, base_features, extra_features)
+
+    print('The prediction accuracy of LSTM for events is: {}'.format(accuracy))
+
+# core_features = ['case concept:name', 'event concept:name', 'event time:timestamp', 'case REG_DATE']
+
+# # Example with unix_reg_time as extra features
+# extra_features = ['event lifecycle:transition', 'case AMOUNT_REQ']
