@@ -46,7 +46,7 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
 
     x_train, y_train = eventInputLstm(df_training, core_features, extra_features, encoder_scaler, number_events_mean)
     x_val, y_val = eventInputLstm(df_validation, core_features, extra_features, encoder_scaler, number_events_mean)
-    x_test, y_test = eventInputLstm(df_training, core_features, extra_features, encoder_scaler, number_events_mean)
+    x_test, y_test = eventInputLstm(df_test, core_features, extra_features, encoder_scaler, number_events_mean)
 
     CLASS_SIZE = unique_training_events.shape[0]
 
@@ -66,7 +66,7 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
                     metrics=['accuracy'])
         return model
 
-    def get_latest(checkpoint_dir, filetype='.h5', signature='cp', overwrite=False):
+    def get_latest(checkpoint_dir, filetype='.h5', signature='cp', overwrite=False, removeall = False):
         """ 
             This is a workaround as tf.train.latest_checkpoint does not seem to
             work well on codalab. Give preference to that function when possible.
@@ -74,34 +74,39 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
             If overwrite is True, the latest checkpoint is reset to 0 and all 
             others are deleted.
         """
-        latest = None
-        latest_number = -1
-        for filename in os.listdir(checkpoint_dir):
-            reference, extension = os.path.splitext(filename)
-            if extension == filetype and reference.startswith('cp'):
-                number = int(re.sub(r"\D", "", reference))
-                if number > latest_number:
-                    latest = filename
-                    latest_number = number
-                else:
-                    if overwrite:
-                        os.remove(os.path.join(checkpoint_dir, filename))
-        if latest is None:
-            raise ValueError('No previous checkpoint found.')
-        if overwrite:
-            os.rename(os.path.join(checkpoint_dir, latest), os.path.join(checkpoint_dir, 'cp-0000.h5'))
-            latest = 'cp-0000.h5'
-            shutil.rmtree(os.path.join(checkpoint_dir, 'logs')) 
-        return os.path.join(checkpoint_dir, latest)
+        if removeall:
+            for filename in os.listdir(checkpoint_dir):
+                os.remove(os.path.join(checkpoint_dir, filename))
+            return None
+        else:
+            latest = None
+            latest_number = -1
+            for filename in os.listdir(checkpoint_dir):
+                reference, extension = os.path.splitext(filename)
+                if extension == filetype and reference.startswith('cp'):
+                    number = int(re.sub(r"\D", "", reference))
+                    if number > latest_number:
+                        latest = filename
+                        latest_number = number
+                    else:
+                        if overwrite:
+                            os.remove(os.path.join(checkpoint_dir, filename))
+            if latest is None:
+                raise ValueError('No previous checkpoint found.')
+            if overwrite:
+                os.rename(os.path.join(checkpoint_dir, latest), os.path.join(checkpoint_dir, 'cp-0000.h5'))
+                latest = 'cp-0000.h5'
+                shutil.rmtree(os.path.join(checkpoint_dir, 'logs')) 
+            return os.path.join(checkpoint_dir, latest)
 
     FILE_PATH="cp-{epoch:04d}.h5"
     LSTM_MODEL = 'lstm.h5'
 
     def run(num_epochs=epochs,  # Maximum number of epochs on which to train
             train_batch_size=128,  # Batch size for training steps
-            job_dir='jobdir', # Local dir to write checkpoints and export model
+            job_dir='../jobdir', # Local dir to write checkpoints and export model
             checkpoint_epochs='epoch',  #  Save checkpoint every epoch
-            load_previous_model=False):
+            removeall=False):
     
         """ This function trains the model for a number of epochs and returns the 
             training history. The model is periodically saved for later use.
@@ -111,9 +116,7 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
             where `model` is a keras object (e.g. as returned by `model_fn`) and 
             `cp_path` is the path for the checkpoint you want to load.
             
-            Setting load_previous_model to True will load the latest checkpoint in
-            `job_dir` and continue training. That checkpoint is renamed cp-0000.h5,
-            while all logs and other checkpoints are deleted. Use with care!
+            Setting load_previous_model to True will remove all training checkpoints.
         
         """
         
@@ -128,11 +131,9 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
         checkpoint_path = os.path.join(job_dir, checkpoint_path)
 
         lstm_model = model_fn(CLASS_SIZE)
-        if load_previous_model:
-            # Load the previously saved weights
-            latest = get_latest(job_dir, overwrite=True)
+        if removeall:
+            latest = get_latest(job_dir, removeall=True)
             lstm_model.load_weights(latest)
-    #         lstm_model.load_weights('jobdir\cp-0000.h5')
 
         # Model checkpoint callback
         checkpoint = keras.callbacks.ModelCheckpoint(
@@ -169,7 +170,7 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
 
         return history
 
-    history = run(load_previous_model=False)
+    history = run(load_previous_model=False, removeall=True)
 
     # Plot accuracy
     plt.plot(history.history['accuracy'], label='accuracy')
@@ -186,18 +187,18 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
     plt.legend(loc='lower right')
 
     lstm_model = model_fn(CLASS_SIZE)
-    latest = get_latest('../job_dir', overwrite=True)
+    latest = get_latest('..\job_dir', overwrite=True)
     lstm_model.load_weights(latest)
 
     y_pred = lstm_model.predict(x_test)
     df_test['predicted_next_event_lstm'] = y_pred
 
     # Store to csv
-    df_test.to_csv('./predCSV/event_test_pred.csv')
+    df_test.to_csv('.\predCSV\event_test_pred.csv')
 
-    accruacy = accuracy_score[y_test, y_pred]
+    accuracy = accuracy_score[y_test, y_pred]
 
-    return accruacy
+    return accuracy
 
 # (df_training, df_validation) = naiveTimeToNextEventPredictor(df_training, df_validation)
 # (df_training, df_test) = naiveTimeToNextEventPredictor(df_training, df_test)
