@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import *
 from LSTM.lstmPrediction import LSTMEvent
 import warnings
+from training.RandomForestPredictor import run_full_rf
 
 warnings.filterwarnings("ignore")
 
@@ -135,6 +136,9 @@ if selected_model == 'event prediction':
     print(df_test)
 
     print('To visualize and track model\'s graph during training, how tensors over time and much more! \nrun \'tensorboard --logdir jobdir_event/logs\' in terminal.')
+
+    if predictors[1] == 'Random forest':
+        accuracy, predicted_df = run_full_rf(df_training_raw, df_test_raw, base_features)
 # core_features = ['case concept:name', 'event concept:name', 'event time:timestamp', 'case REG_DATE']
 
 # # Example extra features
