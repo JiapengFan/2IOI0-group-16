@@ -1,7 +1,7 @@
 import os
-import re
 import shutil
 import tensorflow as tf
+import numpy as np
 from tensorflow import keras
 from .predictionAlgo import naiveNextEventPredictor, naiveTimeToNextEventPredictor
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
@@ -9,17 +9,24 @@ from sklearn.metrics import accuracy_score
 from math import ceil
 from .lstmInput import eventInputLstm, timeInputLstm
 import matplotlib.pyplot as plt
+import warnings
 
 def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_input: list, extra_features: list, epochs = 10):
+
+    warnings.filterwarnings("ignore")
     # Determine actual next event
     (df_training, df_validation) = naiveNextEventPredictor(df_training_raw, df_validation_raw)
     (df_training, df_test) = naiveNextEventPredictor(df_training, df_test_raw)
 
-    unique_training_events = df_training['event concept:name'].unique().reshape(-1, 1)
+    current_unique = df_training['event concept:name'].unique()
+    next_unique = df_training['actual_next_event'].unique()
+    unique_training_events = np.append(next_unique, np.setdiff1d(current_unique, next_unique, assume_unique=True)).reshape(-1, 1)
 
     core_features = core_features_input[0:2].copy()
 
     core_features.append('actual_next_event')
+
+    print('Instantiating scalers and one-hot encoders for features...')
     # Define One-hot encoder for events
     onehot_encoder_event = OneHotEncoder(sparse=False, handle_unknown='ignore')
     onehot_encoder_event = onehot_encoder_event.fit(unique_training_events)
@@ -40,21 +47,29 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
             scaler = scaler.fit(arr_to_be_normalied)
             encoder_scaler[idx + 1] = scaler
 
+    print('Done instantiating scalers and one-hot encoders for features!')
+
     # window size as the mean of case length
     number_events_mean = df_training.groupby('case concept:name').count()['event concept:name'].mean()
     number_events_mean = ceil(number_events_mean)
 
+    print('Converting input to lstm accepted format...')
     x_train, y_train = eventInputLstm(df_training, core_features, extra_features, encoder_scaler, number_events_mean)
     x_val, y_val = eventInputLstm(df_validation, core_features, extra_features, encoder_scaler, number_events_mean)
     x_test, y_test = eventInputLstm(df_test, core_features, extra_features, encoder_scaler, number_events_mean)
+    print('Done converting input to lstm accepted format!')
 
     CLASS_SIZE = unique_training_events.shape[0]
 
     def model_fn(labels_dim):
         """Create a Keras Sequential model with layers."""
         model = keras.models.Sequential()
-        model.add(keras.layers.LSTM(256, input_shape=(number_events_mean, unique_training_events.shape[0])))
-        model.add(keras.layers.Dropout(0.20))
+        model.add(keras.layers.LSTM(128,  return_sequences=True, input_shape=(x_train.shape[1], x_train.shape[2])))
+        model.add(keras.layers.LayerNormalization())
+        model.add(keras.layers.LSTM(64, kernel_initializer='glorot_uniform'))
+        model.add(keras.layers.LayerNormalization())
+        model.add(keras.layers.Dense(32, activation='relu', kernel_initializer='glorot_uniform'))
+        model.add(keras.layers.LayerNormalization())
         model.add(keras.layers.Dense(labels_dim, activation='softmax'))
         model.summary()
         compile_model(model)
@@ -70,7 +85,7 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
     LSTM_MODEL = 'lstm.h5'
 
     def run(num_epochs=epochs,  # Maximum number of epochs on which to train
-            train_batch_size=128,  # Batch size for training steps
+            train_batch_size=64,  # Batch size for training steps
             job_dir='jobdir_event', # Local dir to write checkpoints and export model
             checkpoint_epochs='epoch',  #  Save checkpoint every epoch
             removeall=False):
@@ -124,7 +139,7 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
         #     #implemented earlystopping
         #     callbacks = [checkpoint, tblog, keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=6)]
 
-        callbacks = [checkpoint, tblog, keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=6)]
+        callbacks = [checkpoint, tblog, keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=4)]
 
         history = lstm_model.fit(
                 x=x_train,
@@ -138,34 +153,19 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
         
         lstm_model.save(os.path.join(job_dir, LSTM_MODEL))
 
-        return history, lstm_model
+        return lstm_model, history
 
-    history, lstm_model = run(removeall=True)
+    print('Training LSTM model...')
+    lstm_model, _ = run(removeall=True)
+    print('Done training LSTM model!')
 
-    # Plot accuracy
-    plt.plot(history.history['accuracy'], label='accuracy')
-    plt.plot(history.history['val_accuracy'], label = 'val_accuracy')
-    plt.xlabel('Epoch')
-    plt.ylabel('Accuracy')
-    plt.legend(loc='lower right')
-
-    # Plot loss
-    plt.plot(history.history['loss'], label='loss')
-    plt.plot(history.history['val_loss'], label = 'val_loss')
-    plt.xlabel('Epoch')
-    plt.ylabel('loss')
-    plt.legend(loc='lower right')
-
-    # lstm_model = model_fn(CLASS_SIZE)
-    # latest = get_latest('..\job_dir', overwrite=True)
-    # lstm_model.load_weights(latest)
-
-    y_pred_class = lstm_model.predict_classes(x_test, batch_size=128)
-    y_pred_ohe = np.array([[0] * len(unique_training_events) for pred_class in y_pred_class])
+    y_pred_class = lstm_model.predict_classes(x_test, batch_size=64)
+    y_pred_ohe = np.array([[0] * len(unique_training_events) for _ in y_pred_class])
     for idx, class_pred in enumerate(y_pred_class):
         y_pred_ohe[idx, class_pred] = 1
     
     y_pred = onehot_encoder_event.inverse_transform(y_pred_ohe)
+    y_pred = np.ravel(y_pred)
     df_test['predicted_next_event_lstm'] = y_pred.tolist()
 
     accuracy = accuracy_score(y_test, y_pred_ohe)

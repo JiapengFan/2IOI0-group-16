@@ -160,6 +160,8 @@ def lstmTimePredictor(dataset, validationDataset, applyDataset, coreFeatures, ex
     x_train, y_train = timeInputLstm(df_training, core_features, extraFeatures, encoder_scaler, number_events_mean)
     x_val, y_val = timeInputLstm(df_validation, core_features, extraFeatures, encoder_scaler, number_events_mean)
     x_test, y_test = timeInputLstm(df_test, core_features, extraFeatures, encoder_scaler, number_events_mean)
+
+    print(np.isnan(np.sum(y_train)))
     model = Sequential()
     model.add(LSTM(256, input_shape=(number_events_mean,
                                      unique_training_events.shape[0] + len(extraFeatures)), return_sequences=True))

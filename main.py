@@ -12,8 +12,8 @@ from training.lstmTimeToNextEventPredictor import lstmTimePredictor
 
 
 # Convert csv into dataframe
-df_2012 = pd.read_csv("BPI2012Training.csv")
-df_2012_Test = pd.read_csv("BPI2012Test.csv")
+df_2012 = pd.read_csv("./data/BPI2012Training.csv")
+df_2012_Test = pd.read_csv("./data/BPI2012Test.csv")
 
 # Parse data
 (df_training, df_2012_last_event_per_case) = parseData(df_2012)

@@ -6,6 +6,9 @@ from preprocessing.dataSplitting import dataSplitter
 import tkinter as tk
 from tkinter import *
 from LSTM.lstmPrediction import LSTMEvent
+import warnings
+
+warnings.filterwarnings("ignore")
 
 def User_inputGUI():
     master = tk.Tk()
@@ -68,7 +71,7 @@ def User_inputGUI():
 
     return base_features, extra_features, selected_model
 
-base_features, extra_features, selected_model,  = User_inputGUI()
+base_features, extra_features, selected_model = User_inputGUI()
 
 # Convert csv into dataframe
 df_training_raw = pd.read_csv('.\data\BPI2012Training.csv')
@@ -88,7 +91,11 @@ if selected_model == 'event prediction':
 
     print(df_test)
 
+    print('To visualize and track model\'s graph during training, how tensors over time and much more! \nrun \'tensorboard --logdir jobdir_event/logs\' in terminal.')
 # core_features = ['case concept:name', 'event concept:name', 'event time:timestamp', 'case REG_DATE']
 
-# # Example with unix_reg_time as extra features
+# # Example extra features
 # extra_features = ['event lifecycle:transition', 'case AMOUNT_REQ']
+
+## Load tensorboard
+# tensorboard --logdir jobdir/logs
