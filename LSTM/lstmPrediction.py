@@ -66,45 +66,12 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
                     metrics=['accuracy'])
         return model
 
-    def get_latest(checkpoint_dir, filetype='.h5', signature='cp', overwrite=False, removeall = False):
-        """ 
-            This is a workaround as tf.train.latest_checkpoint does not seem to
-            work well on codalab. Give preference to that function when possible.
-
-            If overwrite is True, the latest checkpoint is reset to 0 and all 
-            others are deleted.
-        """
-        if removeall:
-            for filename in os.listdir(checkpoint_dir):
-                os.remove(os.path.join(checkpoint_dir, filename))
-            return None
-        else:
-            latest = None
-            latest_number = -1
-            for filename in os.listdir(checkpoint_dir):
-                reference, extension = os.path.splitext(filename)
-                if extension == filetype and reference.startswith('cp'):
-                    number = int(re.sub(r"\D", "", reference))
-                    if number > latest_number:
-                        latest = filename
-                        latest_number = number
-                    else:
-                        if overwrite:
-                            os.remove(os.path.join(checkpoint_dir, filename))
-            if latest is None:
-                raise ValueError('No previous checkpoint found.')
-            if overwrite:
-                os.rename(os.path.join(checkpoint_dir, latest), os.path.join(checkpoint_dir, 'cp-0000.h5'))
-                latest = 'cp-0000.h5'
-                shutil.rmtree(os.path.join(checkpoint_dir, 'logs')) 
-            return os.path.join(checkpoint_dir, latest)
-
     FILE_PATH="cp-{epoch:04d}.h5"
     LSTM_MODEL = 'lstm.h5'
 
     def run(num_epochs=epochs,  # Maximum number of epochs on which to train
             train_batch_size=128,  # Batch size for training steps
-            job_dir='../jobdir', # Local dir to write checkpoints and export model
+            job_dir='jobdir_event', # Local dir to write checkpoints and export model
             checkpoint_epochs='epoch',  #  Save checkpoint every epoch
             removeall=False):
     
@@ -132,8 +99,11 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
 
         lstm_model = model_fn(CLASS_SIZE)
         if removeall:
-            latest = get_latest(job_dir, removeall=True)
-            lstm_model.load_weights(latest)
+            for filename in os.listdir(job_dir):
+                try:
+                    os.remove(os.path.join(job_dir, filename))
+                except:
+                    shutil.rmtree(os.path.join(job_dir, filename))
 
         # Model checkpoint callback
         checkpoint = keras.callbacks.ModelCheckpoint(
@@ -154,7 +124,7 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
         #     #implemented earlystopping
         #     callbacks = [checkpoint, tblog, keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=6)]
 
-        callbacks = [checkpoint, tblog]
+        callbacks = [checkpoint, tblog, keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=6)]
 
         history = lstm_model.fit(
                 x=x_train,
@@ -168,9 +138,9 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
         
         lstm_model.save(os.path.join(job_dir, LSTM_MODEL))
 
-        return history
+        return history, lstm_model
 
-    history = run(load_previous_model=False, removeall=True)
+    history, lstm_model = run(removeall=True)
 
     # Plot accuracy
     plt.plot(history.history['accuracy'], label='accuracy')
@@ -186,19 +156,20 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
     plt.ylabel('loss')
     plt.legend(loc='lower right')
 
-    lstm_model = model_fn(CLASS_SIZE)
-    latest = get_latest('..\job_dir', overwrite=True)
-    lstm_model.load_weights(latest)
+    # lstm_model = model_fn(CLASS_SIZE)
+    # latest = get_latest('..\job_dir', overwrite=True)
+    # lstm_model.load_weights(latest)
 
-    y_pred = lstm_model.predict(x_test)
-    df_test['predicted_next_event_lstm'] = y_pred
+    y_pred_class = lstm_model.predict_classes(x_test, batch_size=128)
+    y_pred_ohe = np.array([[0] * len(unique_training_events) for pred_class in y_pred_class])
+    for idx, class_pred in enumerate(y_pred_class):
+        y_pred_ohe[idx, class_pred] = 1
+    
+    y_pred = onehot_encoder_event.inverse_transform(y_pred_ohe)
+    df_test['predicted_next_event_lstm'] = y_pred.tolist()
 
-    # Store to csv
-    df_test.to_csv('.\predCSV\event_test_pred.csv')
-
-    accuracy = accuracy_score[y_test, y_pred]
-
-    return accuracy
+    accuracy = accuracy_score(y_test, y_pred_ohe)
+    return accuracy, df_test
 
 # (df_training, df_validation) = naiveTimeToNextEventPredictor(df_training, df_validation)
 # (df_training, df_test) = naiveTimeToNextEventPredictor(df_training, df_test)

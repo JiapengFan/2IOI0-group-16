@@ -66,26 +66,27 @@ def User_inputGUI():
 
     selected_model = base_model.get()
 
-
     return base_features, extra_features, selected_model
 
-base_features, extra_features, selected_model = User_inputGUI()
+base_features, extra_features, selected_model,  = User_inputGUI()
+
+# Convert csv into dataframe
+df_training_raw = pd.read_csv('.\data\BPI2012Training.csv')
+df_test_raw = pd.read_csv('.\data\BPI2012Test.csv')
+
+# Parsing data
+(df_training, df_2012_last_event_per_case_train) = parseData(df_training_raw)
+(df_test, df_2012_last_event_per_case_test) = parseData(df_test_raw)
+
+# Clean and split the data into train, validation & test data
+(df_training, df_validation, df_test) = dataSplitter(df_training, df_test)
 
 if selected_model == 'event prediction':
-    # Convert csv into dataframe
-    df_training_raw = pd.read_csv('.\data\BPI2012Training.csv')
-    df_test_raw = pd.read_csv('.\data\BPI2012Test.csv')
-
-    # Parsing data
-    (df_training, df_2012_last_event_per_case_train) = parseData(df_training_raw)
-    (df_test, df_2012_last_event_per_case_test) = parseData(df_test_raw)
-
-    # Clean and split the data into train, validation & test data
-    (df_training, df_validation, df_test) = dataSplitter(df_training, df_test)
-
-    accuracy = LSTMEvent(df_training, df_validation, df_test, base_features, extra_features)
+    accuracy, df_test = LSTMEvent(df_training, df_validation, df_test, base_features, extra_features)
 
     print('The prediction accuracy of LSTM for events is: {}'.format(accuracy))
+
+    print(df_test)
 
 # core_features = ['case concept:name', 'event concept:name', 'event time:timestamp', 'case REG_DATE']
 
