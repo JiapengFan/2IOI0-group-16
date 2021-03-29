@@ -1,4 +1,6 @@
 import datetime as dt
+import pandas as pd
+import numpy as np
 
 # Function that parses the incoming data set
 
@@ -32,12 +34,13 @@ def parseData(dataSet):
     # Convert absolute event and reg timestamp into unix time
     dataSet['unix_abs_event_time'] = dataSet['event time:timestamp'].apply(
         lambda x: convertToUnix(x))
-    dataSet['unix_reg_time'] = dataSet['case REG_DATE'].apply(
-        lambda x: convertToUnix(x))
 
     # Time it takes for an event to occur from registeration
-    dataSet['unix_rel_event_time'] = dataSet['unix_abs_event_time'] - \
-        dataSet['unix_reg_time']
+
+    dataSet.sort_values(["case concept:name", "unix_abs_event_time"], inplace=True)
+    tempi = dataSet.groupby(by="case concept:name").first()["unix_abs_event_time"]
+    dataSet["unix_reg_time"] = dataSet["case concept:name"].map(tempi)
+    dataSet["unix_rel_event_time"] = dataSet["unix_abs_event_time"] - dataSet["case concept:name"].map(tempi)
 
     # Group data set by case ID
     dataSet_grouped_by_case = dataSet.groupby(by=['case concept:name'])
