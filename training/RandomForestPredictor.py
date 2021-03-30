@@ -7,39 +7,16 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import RandomForestClassifier
 
-#df_training_raw = pd.read_csv('.\data\BPI2012Training.csv')
-#df_test_raw = pd.read_csv('.\data\BPI2012Test.csv')
-
-features = ['eventID', 'event concept:name', 'event time:timestamp', 'case REG_DATE', 'case AMOUNT_REQ']
-data_train_raw = pd.read_csv(r'C:\Users\20193727\PycharmProjects\2IOI0-group-16(2)\data\BPI2012Training.csv')
-data_test_raw = pd.read_csv(r'C:\Users\20193727\PycharmProjects\2IOI0-group-16(2)\data\BPI2012Test.csv')
-
 def run_full_rf(data_train, data_test, features):
-    #df_training_raw = pd.read_csv('.\data\BPI2012Training.csv')
-    #df_test_raw = pd.read_csv('.\data\BPI2012Test.csv')
-
 
     #rename columns to be able to run all code, will change this back after running the predictions
-    data_train_raw.rename(columns = {features[0]: 'case concept:name', features[1]: 'event concept:name',
+    df_training.rename(columns = {features[0]: 'case concept:name', features[1]: 'event concept:name',
                                  features[2]: 'event time:timestamp'},# features[3]: 'case REG_DATE', features[4]: 'case AMOUNT_REQ'},
                           inplace = True)
 
-    data_test_raw.rename(columns={features[0]: 'case concept:name', features[1]: 'event concept:name',
+    df_test.rename(columns={features[0]: 'case concept:name', features[1]: 'event concept:name',
                                features[2]: 'event time:timestamp'},# features[3]: 'case REG_DATE', features[4]: 'case AMOUNT_REQ'},
                          inplace=True)
-
-    # Parsing data
-    (df_training, df_2012_last_event_per_case_train) = parseData(data_train_raw)
-    (df_test, df_2012_last_event_per_case_test) = parseData(data_test_raw)
-
-    # Clean and split the data into train, validation & test data
-    (df_training, df_validation, df_test) = dataSplitter(df_training, df_test)
-
-    #unique_training_events = df_training['event concept:name'].unique().reshape(-1, 1)
-
-    # Determine actual next event
-    (df_training, df_validation) = naiveNextEventPredictor(df_training, df_validation)
-    (df_test, df_validation) = naiveNextEventPredictor(df_test, df_validation)
 
     current_unique = df_training['event concept:name'].unique()
     next_unique = df_training['actual_next_event'].unique()
@@ -139,12 +116,3 @@ def run_full_rf(data_train, data_test, features):
                           inplace = True)
 
     return accuracy, final_predictions
-
-
-accuracy, pred_df = run_full_rf(data_train_raw, data_test_raw, features)
-
-print(accuracy)
-
-#for i in pred_df:
- #   print(i)
-
