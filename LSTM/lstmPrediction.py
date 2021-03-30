@@ -3,13 +3,21 @@ import shutil
 import tensorflow as tf
 import numpy as np
 from tensorflow import keras
-from .predictionAlgo import naiveNextEventPredictor, naiveTimeToNextEventPredictor
+from keras.layers import Dense, LSTM
+from keras.layers import Dropout
+from keras.models import Sequential
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import mean_squared_error
 from math import ceil
+import math
 from .lstmInput import eventInputLstm, timeInputLstm
 import matplotlib.pyplot as plt
 import warnings
+import numpy as np
+import datetime as dt
+import pandas as pd
+import keras
 
 def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_input: list, extra_features: list, epochs = 10):
 
@@ -221,3 +229,86 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
 # number_events_mean = ceil(number_events_mean)
 
 # x_train, y_train = timeInputLstm(df_training, core_features, extra_features, encoder_scaler, number_events_mean)
+
+
+
+def LSTMTime(dataset, validationDataset, applyDataset, coreFeatures, extraFeatures):
+    # Convert csv into dataframe
+    df_training = dataset.copy()
+    df_validation = validationDataset.copy()
+    df_test = applyDataset.copy()
+
+    def eventTimeConverter(inputData):
+        inputData["day"] = pd.to_datetime(inputData[coreFeatures[2]]).dt.day % 7
+        inputData["hour"] = pd.to_datetime(inputData[coreFeatures[2]]).dt.hour
+        return inputData
+
+    df_training = eventTimeConverter(df_training)
+    df_validation = eventTimeConverter(df_validation)
+    df_test = eventTimeConverter(df_test)
+
+
+
+    current_unique = df_training[coreFeatures[1]].unique()
+    next_unique = df_training['actual_next_event'].unique()
+    unique_training_events = np.append(next_unique, np.setdiff1d(current_unique, next_unique, assume_unique=True)).reshape(-1, 1)
+
+    # Define One-hot encoder for events
+    onehot_encoder_event = OneHotEncoder(sparse=False, handle_unknown='ignore')
+    onehot_encoder_event = onehot_encoder_event.fit(unique_training_events)
+
+    # Normalise time to next event.
+    # Hard coded column can be replaced as argument
+    time_to_next_scaler = MinMaxScaler(feature_range=(0,1))
+    time_to_next_event = df_training['actual_time_to_next_event'].to_numpy().reshape(-1, 1)
+    time_to_next_scaler = time_to_next_scaler.fit(time_to_next_event)
+
+    # see function comment for format
+    core_features = coreFeatures[0:2]
+    core_features.append("actual_time_to_next_event")
+
+    # now determining which feature of the extra features needs to be normalised becomes possible by inspecting the index of scalers list
+    encoder_scaler = [onehot_encoder_event, time_to_next_scaler] + [0]*len(extraFeatures)
+
+    # Instatiate scalers for features consisting out of the type float or int or encoder for categorical featurees
+    for idx, extra_feature in enumerate(extraFeatures):
+        if len(df_training[extra_feature].unique()) < 20:
+            encoder = OneHotEncoder(sparse=False, handle_unknown='ignore')
+            arr_to_be_encoded = df_training[extra_feature].to_numpy().reshape(-1, 1)
+            encoder = encoder.fit(arr_to_be_encoded)
+            encoder_scaler[idx + 2] = encoder
+        else:
+            scaler = MinMaxScaler(feature_range=(0,1))
+            arr_to_be_normalied = df_training[extra_feature].to_numpy().reshape(-1, 1)
+            scaler = scaler.fit(arr_to_be_normalied)
+            encoder_scaler[idx + 2] = scaler
+            
+    # window size as the mean of case length
+    number_events_mean = df_training.groupby('case concept:name').count()['event concept:name'].mean()
+    number_events_mean = ceil(number_events_mean)
+
+    x_train, y_train = timeInputLstm(df_training, core_features, extraFeatures, encoder_scaler, number_events_mean)
+    x_val, y_val = timeInputLstm(df_validation, core_features, extraFeatures, encoder_scaler, number_events_mean)
+    x_test, y_test = timeInputLstm(df_test, core_features, extraFeatures, encoder_scaler, number_events_mean)
+    model = Sequential()
+    model.add(LSTM(256, input_shape=(number_events_mean,
+                                        unique_training_events.shape[0] + len(extraFeatures)), return_sequences=True))
+    model.add(keras.layers.Dropout(0.20))
+
+    model.add(LSTM(units=1, activation='linear'))
+
+
+    model.compile(optimizer="adam", loss='mse')
+    history = model.fit(x_train, y_train, epochs=10, batch_size=256,
+                        validation_data=(x_val, y_val), verbose=2, shuffle=False)
+
+    predictions = model.predict(x_test)
+    predictions_unscaled = time_to_next_scaler.inverse_transform(predictions)
+    y_test_unscaled = time_to_next_scaler.inverse_transform(y_test)
+
+    RMSE = math.sqrt(mean_squared_error(
+        y_test_unscaled[0:, 0], predictions_unscaled[0:, 0]))
+
+    applyDataset["timePrediction"] = predictions_unscaled
+
+    return RMSE, applyDataset

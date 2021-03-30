@@ -96,15 +96,7 @@ def timeInputLstm(df, core_features: list, extra_features: list, scaler_encoder:
     y_arr <'np.array'>: LSTM input in format [samples, features].
     '''
     # See function comment for format
-    case_id_col = core_features[0]
-    event_id_col = core_features[1]
-    y_output_col = core_features[2]
-    
-    scaler_encoder_copy = scaler_encoder.copy()
-    
-    encoder_events = scaler_encoder_copy.pop(0)
 
-    time_to_next_scaler = scaler_encoder_copy.pop(0)
     
     # Prevent modifying argument
     relevant_columns = core_features.copy()
@@ -114,6 +106,17 @@ def timeInputLstm(df, core_features: list, extra_features: list, scaler_encoder:
         df_relevant = df[relevant_columns].copy()
     except:
         print('Please input valid features.')
+
+
+    case_id_col = core_features[0]
+    event_id_col = core_features[1]
+    y_output_col = core_features[2]
+    
+    scaler_encoder_copy = scaler_encoder.copy()
+    
+    encoder_events = scaler_encoder_copy.pop(0)
+
+    time_to_next_scaler = scaler_encoder_copy.pop(0)
 
     # One-hot encode current event
     current_event = df_relevant[event_id_col].to_numpy().reshape(-1, 1)
