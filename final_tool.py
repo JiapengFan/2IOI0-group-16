@@ -62,6 +62,7 @@ def setStates(*args):
 
 
 master = tk.Tk()
+master.title("2IOI0 DBL Process mining group 16")
 e1 = tk.Entry(master)
 e2 = tk.Entry(master)
 e3 = tk.Entry(master)
@@ -135,10 +136,12 @@ def User_inputGUI():
 base_features, extra_features = User_inputGUI()
 
 # Convert csv into dataframe
+print("Loading datasets")
 df_training_raw = pd.read_csv(dirname + e10.get())
 df_test_raw = pd.read_csv(dirname + e11.get())
 
 # Parsing data
+print("Parsing and splitting the data")
 (df_training, df_2012_last_event_per_case_train) = parseData(df_training_raw)
 (df_test, df_2012_last_event_per_case_test) = parseData(df_test_raw)
 
@@ -146,6 +149,7 @@ df_test_raw = pd.read_csv(dirname + e11.get())
 (df_training, df_validation, df_test) = dataSplitter(df_training, df_test)
 
 # Apply the naive predictors to all the datasets
+print("Apply naive predictor and find actual next event and time to next event")
 (df_training, df_test) = naiveTimeToNextEventPredictor(df_training, df_test)
 (df_training, df_test) = naiveNextEventPredictor(df_training, df_test)
 (df_training, df_validation) = naiveTimeToNextEventPredictor(df_training, df_validation)

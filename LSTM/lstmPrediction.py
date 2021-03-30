@@ -68,14 +68,14 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
 
     def model_fn(labels_dim):
         """Create a Keras Sequential model with layers."""
-        model = keras.models.Sequential()
-        model.add(keras.layers.LSTM(128,  return_sequences=True, input_shape=(x_train.shape[1], x_train.shape[2])))
-        model.add(keras.layers.LayerNormalization())
-        model.add(keras.layers.LSTM(64, kernel_initializer='glorot_uniform'))
-        model.add(keras.layers.LayerNormalization())
-        model.add(keras.layers.Dense(32, activation='relu', kernel_initializer='glorot_uniform'))
-        model.add(keras.layers.LayerNormalization())
-        model.add(keras.layers.Dense(labels_dim, activation='softmax'))
+        model = tf.keras.Sequential()
+        model.add(tf.keras.layers.LSTM(128,  return_sequences=True, input_shape=(x_train.shape[1], x_train.shape[2])))
+        model.add(tf.keras.layers.LayerNormalization())
+        model.add(tf.keras.layers.LSTM(64, kernel_initializer='glorot_uniform'))
+        model.add(tf.keras.layers.LayerNormalization())
+        model.add(tf.keras.layers.Dense(32, activation='relu', kernel_initializer='glorot_uniform'))
+        model.add(tf.keras.layers.LayerNormalization())
+        model.add(tf.keras.layers.Dense(labels_dim, activation='softmax'))
         model.summary()
         compile_model(model)
         return model
@@ -126,7 +126,7 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
                     shutil.rmtree(os.path.join(job_dir, filename))
 
         # Model checkpoint callback
-        checkpoint = keras.callbacks.ModelCheckpoint(
+        checkpoint = tf.keras.callbacks.ModelCheckpoint(
             checkpoint_path,
             monitor='val_loss',
             verbose=2,
@@ -134,7 +134,7 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
             mode='max')
 
         # Tensorboard logs callback
-        tblog = keras.callbacks.TensorBoard(
+        tblog = tf.keras.callbacks.TensorBoard(
             log_dir=os.path.join(job_dir, 'logs'),
             histogram_freq=0,
             update_freq='epoch',
@@ -144,7 +144,7 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
         #     #implemented earlystopping
         #     callbacks = [checkpoint, tblog, keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=6)]
 
-        callbacks = [checkpoint, tblog, keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=4)]
+        callbacks = [checkpoint, tblog, tf.keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=4)]
 
         history = lstm_model.fit(
                 x=x_train,
@@ -176,58 +176,6 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
     accuracy = accuracy_score(y_test, y_pred_ohe)
     return accuracy, df_test
 
-# (df_training, df_validation) = naiveTimeToNextEventPredictor(df_training, df_validation)
-# (df_training, df_test) = naiveTimeToNextEventPredictor(df_training, df_test)
-
-# unique_training_events = df_training['event concept:name'].unique().reshape(-1, 1)
-
-# # Define One-hot encoder for events
-# onehot_encoder_event = OneHotEncoder(sparse=False, handle_unknown='ignore')
-# onehot_encoder_event = onehot_encoder_event.fit(unique_training_events)
-
-# def eventDay(dataSet):
-#     dataSet["day"] = pd.to_datetime(dataSet["event time:timestamp"]).dt.day
-# def eventStartHour(dataSet):
-#     dataSet["hour"] = pd.to_datetime(dataSet["event time:timestamp"]).dt.hour
-    
-# eventDay(df_training)
-# eventStartHour(df_training)
-
-# # Normalise time to next event.
-# # Hard coded column can be replaced as argument
-# time_to_next_scaler = MinMaxScaler(feature_range=(0,1))
-# time_to_next_event = df_training['actual_time_to_next_event'].to_numpy().reshape(-1, 1)
-# time_to_next_scaler = time_to_next_scaler.fit(time_to_next_event)
-
-# # see function comment for format
-# core_features = ['case concept:name', 'event concept:name', 'actual_time_to_next_event']
-
-# # Example with unix_reg_time as extra features
-# extra_features = ['event lifecycle:transition', 'day']
-
-# # now determining which feature of the extra features needs to be normalised becomes possible by inspecting the index of scalers list
-# encoder_scaler = [onehot_encoder_event, time_to_next_scaler] + [0]*len(extra_features)
-
-# # Instatiate scalers for features consisting out of the type float or int or encoder for categorical featurees
-# for idx, extra_feature in enumerate(extra_features):
-#     if len(df_training[extra_feature].unique()) < 20:
-#         encoder = OneHotEncoder(sparse=False, handle_unknown='ignore')
-#         arr_to_be_encoded = df_training[extra_feature].to_numpy().reshape(-1, 1)
-#         encoder = encoder.fit(arr_to_be_encoded)
-#         encoder_scaler[idx + 2] = encoder
-#     else:
-#         scaler = MinMaxScaler(feature_range=(0,1))
-#         arr_to_be_normalied = df_training[extra_feature].to_numpy().reshape(-1, 1)
-#         scaler = scaler.fit(arr_to_be_normalied)
-#         encoder_scaler[idx + 2] = scaler
-        
-# # window size as the mean of case length
-# number_events_mean = df_training.groupby('case concept:name').count()['event concept:name'].mean()
-# number_events_mean = ceil(number_events_mean)
-
-# x_train, y_train = timeInputLstm(df_training, core_features, extra_features, encoder_scaler, number_events_mean)
-
-
 
 def LSTMTime(dataset, validationDataset, applyDataset, coreFeatures, extraFeatures, epochs):
     # Convert csv into dataframe
@@ -240,6 +188,7 @@ def LSTMTime(dataset, validationDataset, applyDataset, coreFeatures, extraFeatur
         inputData["hour"] = pd.to_datetime(inputData[coreFeatures[2]]).dt.hour
         return inputData
 
+    print("Adding hour of day and day of week for training")
     df_training = eventTimeConverter(df_training)
     df_validation = eventTimeConverter(df_validation)
     df_test = eventTimeConverter(df_test)
@@ -251,6 +200,7 @@ def LSTMTime(dataset, validationDataset, applyDataset, coreFeatures, extraFeatur
     unique_training_events = np.append(next_unique, np.setdiff1d(current_unique, next_unique, assume_unique=True)).reshape(-1, 1)
 
     # Define One-hot encoder for events
+    print('Instantiating scalers and one-hot encoders for features...')
     onehot_encoder_event = OneHotEncoder(sparse=False, handle_unknown='ignore')
     onehot_encoder_event = onehot_encoder_event.fit(unique_training_events)
 
@@ -284,6 +234,7 @@ def LSTMTime(dataset, validationDataset, applyDataset, coreFeatures, extraFeatur
     number_events_mean = df_training.groupby('case concept:name').count()['event concept:name'].mean()
     number_events_mean = ceil(number_events_mean)
 
+    print('Converting input to lstm accepted format')
     x_train, y_train = timeInputLstm(df_training, core_features, extraFeatures, encoder_scaler, number_events_mean)
     x_val, y_val = timeInputLstm(df_validation, core_features, extraFeatures, encoder_scaler, number_events_mean)
     x_test, y_test = timeInputLstm(df_test, core_features, extraFeatures, encoder_scaler, number_events_mean)
@@ -293,6 +244,8 @@ def LSTMTime(dataset, validationDataset, applyDataset, coreFeatures, extraFeatur
     model.add(keras.layers.Dropout(0.20))
 
     model.add(LSTM(units=1, activation='linear'))
+
+    print(model.summary())
 
 
     model.compile(optimizer="adam", loss='mse')
