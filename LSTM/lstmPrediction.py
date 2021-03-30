@@ -19,12 +19,9 @@ import datetime as dt
 import pandas as pd
 import keras
 
-def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_input: list, extra_features: list, epochs = 10):
+def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, extra_features: list, epochs):
 
     warnings.filterwarnings("ignore")
-    # Determine actual next event
-    (df_training, df_validation) = naiveNextEventPredictor(df_training_raw, df_validation_raw)
-    (df_training, df_test) = naiveNextEventPredictor(df_training, df_test_raw)
 
     current_unique = df_training['event concept:name'].unique()
     next_unique = df_training['actual_next_event'].unique()
@@ -232,7 +229,7 @@ def LSTMEvent(df_training_raw, df_validation_raw, df_test_raw, core_features_inp
 
 
 
-def LSTMTime(dataset, validationDataset, applyDataset, coreFeatures, extraFeatures):
+def LSTMTime(dataset, validationDataset, applyDataset, coreFeatures, extraFeatures, epochs):
     # Convert csv into dataframe
     df_training = dataset.copy()
     df_validation = validationDataset.copy()
@@ -299,7 +296,7 @@ def LSTMTime(dataset, validationDataset, applyDataset, coreFeatures, extraFeatur
 
 
     model.compile(optimizer="adam", loss='mse')
-    history = model.fit(x_train, y_train, epochs=10, batch_size=256,
+    history = model.fit(x_train, y_train, epochs=epochs, batch_size=256,
                         validation_data=(x_val, y_val), verbose=2, shuffle=False)
 
     predictions = model.predict(x_test)
