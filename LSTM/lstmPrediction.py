@@ -74,7 +74,6 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
         model.add(tf.keras.layers.LSTM(64, kernel_initializer='glorot_uniform'))
         model.add(tf.keras.layers.LayerNormalization())
         model.add(tf.keras.layers.Dense(32, activation='relu', kernel_initializer='glorot_uniform'))
-        model.add(tf.keras.layers.LayerNormalization())
         model.add(tf.keras.layers.Dense(labels_dim, activation='softmax'))
         model.summary()
         compile_model(model)
@@ -103,7 +102,7 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
             where `model` is a keras object (e.g. as returned by `model_fn`) and 
             `cp_path` is the path for the checkpoint you want to load.
             
-            Setting load_previous_model to True will remove all training checkpoints.
+            Setting removeall to True will remove all training checkpoints.
         
         """
         
@@ -273,7 +272,7 @@ def LSTMTime(dataset, validationDataset, applyDataset, coreFeatures, extraFeatur
             where `model` is a keras object (e.g. as returned by `model_fn`) and 
             `cp_path` is the path for the checkpoint you want to load.
             
-            Setting load_previous_model to True will remove all training checkpoints.
+            Setting removeall to True will remove all training checkpoints.
         
         """
         

@@ -22,14 +22,16 @@ def confusion_matrix_event(actual_list, predicted_list, events: list):
         Returns:
         confusion_matrix <type: 'pd.DataFrame'>: Dataframe in confusion matrix format.
     '''
+    print('Im here')
     confusion_matrix = pd.DataFrame(index = events, columns = events)
     confusion_matrix.fillna(0, inplace=True)
 
     dataframe_elements = np.stack((actual_list, predicted_list), axis=-1)
+    print('Im here')
 
     # Loop through actual events
     for element in dataframe_elements:
-            confusion_matrix.at[element[1], element[0]] += 1
+        confusion_matrix.at[element[1], element[0]] += 1
 
     return confusion_matrix
 
