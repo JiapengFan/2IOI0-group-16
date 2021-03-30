@@ -238,21 +238,99 @@ def LSTMTime(dataset, validationDataset, applyDataset, coreFeatures, extraFeatur
     x_train, y_train = timeInputLstm(df_training, core_features, extraFeatures, encoder_scaler, number_events_mean)
     x_val, y_val = timeInputLstm(df_validation, core_features, extraFeatures, encoder_scaler, number_events_mean)
     x_test, y_test = timeInputLstm(df_test, core_features, extraFeatures, encoder_scaler, number_events_mean)
-    model = Sequential()
-    model.add(LSTM(256, input_shape=(number_events_mean,
-                                        unique_training_events.shape[0] + len(extraFeatures)), return_sequences=True))
-    model.add(keras.layers.Dropout(0.20))
 
-    model.add(LSTM(units=1, activation='linear'))
+    def model_fn():
+        """Create a Keras Sequential model with layers."""
+        model = tf.keras.Sequential()
+        model.add(tf.keras.layers.LSTM(256, input_shape=(number_events_mean,
+                                            unique_training_events.shape[0] + len(extraFeatures)), return_sequences=True))
+        model.add(tf.keras.layers.Dropout(0.20))
+        model.add(tf.keras.layers.LSTM(units=1, activation='linear'))
+        model.summary()
+        compile_model(model)
+        return model
 
-    print(model.summary())
+    def compile_model(model):
+        model.compile(loss='mse', 
+                    optimizer='adam',
+                    metrics=[tf.keras.metrics.RootMeanSquaredError()])
+        return model
 
+    FILE_PATH="cp-{epoch:04d}.h5"
+    LSTM_MODEL = 'lstm.h5'
 
-    model.compile(optimizer="adam", loss='mse')
-    history = model.fit(x_train, y_train, epochs=epochs, batch_size=256,
-                        validation_data=(x_val, y_val), verbose=2, shuffle=False)
+    def run(num_epochs=epochs,  # Maximum number of epochs on which to train
+            train_batch_size=64,  # Batch size for training steps
+            job_dir='jobdir_time', # Local dir to write checkpoints and export model
+            checkpoint_epochs='epoch',  #  Save checkpoint every epoch
+            removeall=False):
+    
+        """ This function trains the model for a number of epochs and returns the 
+            training history. The model is periodically saved for later use.
 
-    predictions = model.predict(x_test)
+            You can load a pre-trained model with 
+                `model.load_weights(cp_path)`
+            where `model` is a keras object (e.g. as returned by `model_fn`) and 
+            `cp_path` is the path for the checkpoint you want to load.
+            
+            Setting load_previous_model to True will remove all training checkpoints.
+        
+        """
+        
+        tf.keras.backend.clear_session()
+
+        try:
+            os.makedirs(job_dir)
+        except:
+            pass
+
+        checkpoint_path = FILE_PATH
+        checkpoint_path = os.path.join(job_dir, checkpoint_path)
+
+        lstm_model = model_fn()
+        if removeall:
+            for filename in os.listdir(job_dir):
+                try:
+                    os.remove(os.path.join(job_dir, filename))
+                except:
+                    shutil.rmtree(os.path.join(job_dir, filename))
+
+        # Model checkpoint callback
+        checkpoint = tf.keras.callbacks.ModelCheckpoint(
+            checkpoint_path,
+            monitor='val_loss',
+            verbose=2,
+            save_freq=checkpoint_epochs,
+            mode='max')
+
+        # Tensorboard logs callback
+        tblog = tf.keras.callbacks.TensorBoard(
+            log_dir=os.path.join(job_dir, 'logs'),
+            histogram_freq=0,
+            update_freq='epoch',
+            write_graph=True,
+            embeddings_freq=0)
+
+    #implemented earlystopping
+        callbacks = [checkpoint, tblog, tf.keras.callbacks.EarlyStopping(monitor='val_root_mean_squared_error', patience=4)]
+
+        history = lstm_model.fit(
+                x=x_train,
+                y=y_train, 
+                validation_data = (x_val, y_val),
+                batch_size=train_batch_size,
+                steps_per_epoch=None,
+                epochs=num_epochs,
+                callbacks=callbacks,
+                verbose=2)
+        
+        lstm_model.save(os.path.join(job_dir, LSTM_MODEL))
+
+        return lstm_model, history
+
+    lstm_model, _ = run(removeall=True)
+
+    predictions = lstm_model.predict(x_test)
     predictions_unscaled = time_to_next_scaler.inverse_transform(predictions)
     y_test_unscaled = time_to_next_scaler.inverse_transform(y_test)
 
