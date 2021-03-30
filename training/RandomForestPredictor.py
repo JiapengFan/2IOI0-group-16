@@ -52,7 +52,7 @@ def run_full_rf(data_train, data_test, features):
     def createInputRF(df):
         # df with only relevant training data, i.e. loan amount, current event, next event and time elapsed since registeration.
         df_relevant = df[
-            ['case concept:name', 'event concept:name', 'actual_next_event', 'case AMOUNT_REQ', 'unix_reg_time']].copy()
+            ['case concept:name', 'event concept:name', 'actual_next_event', 'unix_reg_time']].copy() # 'case AMOUNT_REQ', left out
 
         # One-hot encode current and next event
         training_current_event = df_relevant['event concept:name'].to_numpy().reshape(-1, 1)
