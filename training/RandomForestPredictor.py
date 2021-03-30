@@ -21,11 +21,11 @@ def run_full_rf(data_train, data_test, features):
 
     #rename columns to be able to run all code, will change this back after running the predictions
     data_train_raw.rename(columns = {features[0]: 'case concept:name', features[1]: 'event concept:name',
-                                 features[2]: 'event time:timestamp', features[3]: 'case REG_DATE', features[4]: 'case AMOUNT_REQ'},
+                                 features[2]: 'event time:timestamp'},# features[3]: 'case REG_DATE', features[4]: 'case AMOUNT_REQ'},
                           inplace = True)
 
     data_test_raw.rename(columns={features[0]: 'case concept:name', features[1]: 'event concept:name',
-                               features[2]: 'event time:timestamp', features[3]: 'case REG_DATE', features[4]: 'case AMOUNT_REQ'},
+                               features[2]: 'event time:timestamp'},# features[3]: 'case REG_DATE', features[4]: 'case AMOUNT_REQ'},
                          inplace=True)
 
     # Parsing data
@@ -61,10 +61,10 @@ def run_full_rf(data_train, data_test, features):
         training_next_event = df_relevant['actual_next_event'].to_numpy().reshape(-1, 1)
         df_relevant['actual_next_event'] = onehot_encoder.transform(training_next_event).tolist()
 
-        # Normalise loan amount
-        loan_scaler = MinMaxScaler(feature_range=(0, 1))
-        case_amount = df_relevant['case AMOUNT_REQ'].to_numpy().reshape(-1, 1)
-        df_relevant['case AMOUNT_REQ'] = np.around(loan_scaler.fit_transform(case_amount), decimals=4)
+        # Normalise loan amount, amount left out for now
+        #loan_scaler = MinMaxScaler(feature_range=(0, 1))
+        #case_amount = df_relevant['case AMOUNT_REQ'].to_numpy().reshape(-1, 1)
+        #df_relevant['case AMOUNT_REQ'] = np.around(loan_scaler.fit_transform(case_amount), decimals=4)
 
         # Normalise time in seconds from case registeration to current event
         time_scaler = MinMaxScaler(feature_range=(0, 1))
@@ -84,7 +84,7 @@ def run_full_rf(data_train, data_test, features):
         # Find input and output vector in form of [samples, features]
         for unique_id in unique_case_ids:
             xy_unique_id = df_groupby_case_id.get_group(unique_id)[
-                ['event concept:name', 'actual_next_event', 'case AMOUNT_REQ', 'unix_reg_time']].values.tolist()
+                ['event concept:name', 'actual_next_event',  'unix_reg_time']].values.tolist() #'case AMOUNT_REQ', left out
 
             base_case = xy_unique_id[0][0:2].copy()
             x_first_sample_per_case = base_case[0].copy()
@@ -135,7 +135,7 @@ def run_full_rf(data_train, data_test, features):
 
 
     final_df.rename(columns = {'case concept:name': features[0], 'event concept:name': features[1],
-                                 'event time:timestamp': features[2], 'case REG_DATE': features[3], 'case AMOUNT_REQ': features[4]},
+                                 'event time:timestamp': features[2]},# 'case REG_DATE': features[3], 'case AMOUNT_REQ': features[4]},
                           inplace = True)
 
     return accuracy, final_predictions
