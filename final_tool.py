@@ -3,6 +3,7 @@ import numpy as np
 from preprocessing.dataParsing import parseData
 from preprocessing.dataSplitting import dataSplitter
 from training.predictionAlgo import naiveNextEventPredictor, naiveTimeToNextEventPredictor
+from training.MultiVarRegModel import RegModel
 import tkinter as tk
 from tkinter import *
 from LSTM.lstmPrediction import LSTMEvent, LSTMTime
@@ -12,7 +13,8 @@ import os
 
 warnings.filterwarnings("ignore")
 
-dirname = os.path.dirname(__file__) + "/"
+dirname = os.path.dirname(__file__)
+print(dirname)
 base_model = ""
 epochs = 10
 
@@ -58,6 +60,10 @@ def setStates(*args):
             e8.configure(state="disabled")
             e9.configure(state="disabled")
 
+    if (loadPreviousModels.get() == 1):
+        e13.configure(state="normal")
+    else:
+        e13.configure(state="disabled")
 
 
 
@@ -72,11 +78,13 @@ e8 = tk.Entry(master)
 e9 = tk.Entry(master)
 e10 = tk.Entry(master)
 e11 = tk.Entry(master)
+e12 = tk.Entry(master)
+e13 = tk.Entry(master)
 tk.Label(master, text='Time prediction').grid(row=7, column=0)
 time_pred = StringVar(master)
 time_pred.set("LSTM")
 time_pred.trace("w", setStates)
-d2 = OptionMenu(master, time_pred, 'LSTM', 'naive predictor')
+d2 = OptionMenu(master, time_pred, 'LSTM', 'Multivariate regression', 'naive predictor')
 d2.grid(row=7, column=1)
 tk.Label(master, text='Event prediction').grid(row=7, column=2)
 event_pred = StringVar(master)
@@ -91,6 +99,11 @@ base_model.set("time and event prediction")
 base_model.trace("w", setStates)
 d1 = OptionMenu(master, base_model, 'event prediction', 'time prediction', 'time and event prediction')
 d1.grid(row=3, column=1)
+loadPreviousModels = tk.IntVar()
+loadPreviousModels.trace("w", setStates)
+checkboxPreviousModelLoader = tk.Checkbutton(master, text="Load previous LSTM model (specify epoch, default is last)", variable=loadPreviousModels, onvalue=1, offvalue=0, )
+checkboxPreviousModelLoader.grid(row=11, column = 2)
+e13.configure(state="disabled")
 
 
 def User_inputGUI():
@@ -105,15 +118,17 @@ def User_inputGUI():
     tk.Label(master, text="File name for datasets including extension").grid(row=0, column=0)
     tk.Label(master, text="Training dataset").grid(row=1, column=0)
     tk.Label(master, text="Test dataset").grid(row=1, column=1)
+    tk.Label(master, text="Output csv file name").grid(row=1, column=2)
+    tk.Label(master, text="Progress of the program will be printed in the console").grid(row=19, column=0)
 
-    global e1, e2, e3, e6, e7, e8, e9, d1, d2, d3, base_model, event_pred, time_pred, epochs
+    global e1, e2, e3, e6, e7, e8, e9, e10, e11, e12, e13, d1, d2, d3, base_model, event_pred, time_pred, epochs
     e10.insert(0, "training.csv")
     e11.insert(0, "test.csv")
     e9.insert(0, epochs)
     e1.insert(0, "case concept:name")
     e2.insert(0, "event concept:name")
     e3.insert(0, "event time:timestamp")
-
+    e12.insert(0, "Output.csv")
 
     e1.grid(row=15, column=0)
     e2.grid(row=15, column=1)
@@ -124,6 +139,8 @@ def User_inputGUI():
     e9.grid(row=11, column=1)
     e10.grid(row=2, column=0)
     e11.grid(row=2, column=1)
+    e12.grid(row=2, column = 2)
+    e13.grid(row=11, column=3)
     tk.Button(master, text='Confirm variables', command=master.quit).grid(row=19, column=0, sticky=tk.W, pady=4)
     master.mainloop()
 
@@ -135,11 +152,21 @@ def User_inputGUI():
 
 base_features, extra_features = User_inputGUI()
 
+loadEpoch = ""
+if (loadPreviousModels.get() == 1):
+    loadEpoch = e13.get()
+else:
+    loadEpoch = 0
+
+print("1")
+print(loadEpoch)
+print("1")
+
 # Convert csv into dataframe
 print("Loading datasets")
-df_training_raw = pd.read_csv(dirname + e10.get())
-df_test_raw = pd.read_csv(dirname + e11.get())
-
+df_training_raw = pd.read_csv(dirname + "/data/" + e10.get())
+df_test_raw = pd.read_csv(dirname + "/data/" + e11.get())
+df_test_columns = df_test_raw.columns
 # Parsing data
 print("Parsing and splitting the data")
 (df_training, df_2012_last_event_per_case_train) = parseData(df_training_raw)
@@ -159,26 +186,32 @@ if "event" in base_model.get():
     if ("LSTM" in event_pred.get()):
         print("Starting training for the LSTM model regarding events")
         accuracy, df_test = LSTMEvent(df_training, df_validation, df_test, base_features, extra_features, int(e9.get()))
-        print('The prediction accuracy of the LSTM model for events is: {}'.format(accuracy))
+        print('The prediction accuracy of the LSTM model for events is: {}%'.format(round(accuracy * 100, 2)))
+        print('To visualize and track model\'s graph during training, how tensors over time and much more! \nrun \'tensorboard --logdir jobdir_event/logs\' in terminal.')
     elif ("forest" in event_pred.get()):
         print("Starting training for random forest regarding events")
         accuracy, df_test = run_full_rf(df_training, df_test, base_features)
-        print('The prediction accuracy of random forest for events is: {}'.format(accuracy))
-    print(accuracy)
+        print('The prediction accuracy of random forest for events is: {}%'.format(round(accuracy * 100, 2)))
         
 if "time" in base_model.get():
     if ("LSTM" in time_pred.get()):
         print("Starting training for the LSTM model regarding time")
         RMSE, df_test = LSTMTime(df_training, df_validation, df_test, base_features, extra_features, int(e9.get()))
-        print('The RMSE of the LSTM model for time is: {}'.format(RMSE))
-    else:
+        print('The RMSE of the LSTM model for time is: {} seconds'.format(round(RMSE, 0)))
+        print('To visualize and track model\'s graph during training, how tensors over time and much more! \nrun \'tensorboard --logdir jobdir_time/logs\' in terminal.')
+    elif ("multi" in time_pred.get()):
         print("Starting training for the multivariate regression model regarding time")
-        #accuracy, df_test = LSTMTime(df_training, df_validation, df_test, base_features, extra_features)
-        print('The RMSE of the multivariate regression model for time is: {}'.format(RMSE))
+        RMSE, df_test = RegModel(df_training, df_test, base_features)
+        print('The RMSE of the multivariate regression model for time is: {} seconds'.format(round(RMSE, 0)))
 
-print(df_test)
+print(df_test.head(10))
 
-
-#print('To visualize and track model\'s graph during training, how tensors over time and much more! \nrun \'tensorboard --logdir jobdir_event/logs\' in terminal.')
-## Load tensorboard
-# tensorboard --logdir jobdir/logs
+for x in df_test.columns:
+    if (x not in df_test_columns):
+        if not (x == "timePrediction" or x == "eventPrediction" or x == "naive_predicted_time_to_next_event" or x == "naive_predicted_next_event"):
+            df_test.drop(columns=x, inplace=True)
+    
+print("Outputting csv file")
+df_test.to_csv(dirname + "/output/" + e12.get(), index=False)
+print("Finished processing request!!")
+master.destroy()

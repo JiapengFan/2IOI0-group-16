@@ -10,13 +10,11 @@ from sklearn.ensemble import RandomForestClassifier
 def run_full_rf(data_train, data_test, features):
 
     #rename columns to be able to run all code, will change this back after running the predictions
-    df_training.rename(columns = {features[0]: 'case concept:name', features[1]: 'event concept:name',
-                                 features[2]: 'event time:timestamp'},# features[3]: 'case REG_DATE', features[4]: 'case AMOUNT_REQ'},
-                          inplace = True)
+    df_training = data_train.rename(columns = {features[0]: 'case concept:name', features[1]: 'event concept:name',
+                                 features[2]: 'event time:timestamp'})
 
-    df_test.rename(columns={features[0]: 'case concept:name', features[1]: 'event concept:name',
-                               features[2]: 'event time:timestamp'},# features[3]: 'case REG_DATE', features[4]: 'case AMOUNT_REQ'},
-                         inplace=True)
+    df_test = data_test.rename(columns={features[0]: 'case concept:name', features[1]: 'event concept:name',
+                               features[2]: 'event time:timestamp'})
 
     current_unique = df_training['event concept:name'].unique()
     next_unique = df_training['actual_next_event'].unique()
@@ -101,7 +99,7 @@ def run_full_rf(data_train, data_test, features):
     final_predictions = onehot_encoder.inverse_transform(predictions)
 
     final_df = df_test.copy()
-    final_df['predicted_event'] = final_predictions
+    final_df['eventPrediction'] = final_predictions
 
     acc = 0
     for i in final_df.index:
@@ -115,4 +113,4 @@ def run_full_rf(data_train, data_test, features):
                                  'event time:timestamp': features[2]},# 'case REG_DATE': features[3], 'case AMOUNT_REQ': features[4]},
                           inplace = True)
 
-    return accuracy, final_predictions
+    return accuracy, final_df

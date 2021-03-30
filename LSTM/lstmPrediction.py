@@ -170,7 +170,7 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
     
     y_pred = onehot_encoder_event.inverse_transform(y_pred_ohe)
     y_pred = np.ravel(y_pred)
-    df_test['predicted_next_event_lstm'] = y_pred.tolist()
+    df_test['eventPrediction'] = y_pred.tolist()
 
     accuracy = accuracy_score(y_test, y_pred_ohe)
     return accuracy, df_test
