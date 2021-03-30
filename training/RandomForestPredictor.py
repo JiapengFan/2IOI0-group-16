@@ -69,7 +69,7 @@ def run_full_rf(data_train, data_test, features):
         # Normalise time in seconds from case registeration to current event
         time_scaler = MinMaxScaler(feature_range=(0, 1))
         reg_time = df_relevant['unix_reg_time'].to_numpy().reshape(-1, 1)
-        df_relevant['unix_reg_time'] = np.around(loan_scaler.fit_transform(reg_time), decimals=4)
+        df_relevant['unix_reg_time'] = np.around(time_scaler.fit_transform(reg_time), decimals=4)
 
         # Prepare input and output in form of [samples, features]
         x = []
@@ -88,7 +88,7 @@ def run_full_rf(data_train, data_test, features):
 
             base_case = xy_unique_id[0][0:2].copy()
             x_first_sample_per_case = base_case[0].copy()
-            x_first_sample_per_case.extend([xy_unique_id[0][2], xy_unique_id[0][3]])
+            x_first_sample_per_case.extend([xy_unique_id[0][2]])#, xy_unique_id[0][3]])
             x.append(x_first_sample_per_case)
             y.append(base_case[1].copy())
 
@@ -96,7 +96,7 @@ def run_full_rf(data_train, data_test, features):
             for event in xy_unique_id[1:]:
                 base_case[0] = [prev_xs + current_x for prev_xs, current_x in zip(base_case[0], event[0])]
                 x_sample = base_case[0].copy()
-                x_sample.extend([event[2], event[3]])
+                x_sample.extend([event[2]])#, event[3]])
                 x.append(x_sample)
                 y.append(event[1])
         return x, y
