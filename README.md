@@ -9,7 +9,7 @@ Install Python environment: *pip install -r requirements.txt*.
 Run final_tool.py.
 
 A GUI will show up. 
-The mandatory input fields that can be filled in the recommended order are
+The input fields that can be filled in the recommended order are
   1. Path to training and test data set from the root.
   2. The name of your output csv file containing the predicted and actual result.
   3. Whether you want to make use of event or time prediction or both.
@@ -26,4 +26,4 @@ The mandatory input fields that can be filled in the recommended order are
 The tool will then print progress messages in the terminal.
 When you see 'Finished processing request!!'. The tool will terminate and the output csv can be found in output/"name given in input field 2"
 
-#Enjoy the tool!!
+#Enjoy using the tool!!
