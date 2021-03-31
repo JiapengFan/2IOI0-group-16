@@ -14,7 +14,7 @@ The input fields that can be filled in the recommended order are
   2. The name of your output csv file containing the predicted and actual result.
   3. Whether you want to make use of event or time prediction or both.
   4. Select the algorithm you want to apply.
-  (5.)If LSTM is selected as the prediction algorithm, 
+  5. If LSTM is selected as the prediction algorithm, otherwise skip 5 
       i. The max number of epoch you wish to train on can be provided.
       ii. (optional) Load a trained model to apply the test dataset.
       iii. (optional) Load a trained model and will be trained for the max number of epochs given in i.
