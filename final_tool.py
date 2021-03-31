@@ -27,11 +27,13 @@ def setStates(*args):
             e7.configure(state="normal")
             e8.configure(state="normal")
             e9.configure(state="normal")
+            checkboxPreviousModelLoader.configure(state="normal")
         else:
             e6.configure(state="disabled")
             e7.configure(state="disabled")
             e8.configure(state="disabled")
             e9.configure(state="disabled")
+            checkboxPreviousModelLoader.configure(state="disabled")
     elif ("time" in base_model.get()):
         d3.configure(state="disabled")
         d2.configure(state="normal")
@@ -40,11 +42,13 @@ def setStates(*args):
             e7.configure(state="normal")
             e8.configure(state="normal")
             e9.configure(state="normal")
+            checkboxPreviousModelLoader.configure(state="normal")
         else:
             e6.configure(state="disabled")
             e7.configure(state="disabled")
             e8.configure(state="disabled")
             e9.configure(state="disabled")
+            checkboxPreviousModelLoader.configure(state="disabled")
     elif ("event" in base_model.get()):
         d2.configure(state="disabled")
         d3.configure(state="normal")
@@ -53,16 +57,20 @@ def setStates(*args):
             e7.configure(state="normal")
             e8.configure(state="normal")
             e9.configure(state="normal")
+            checkboxPreviousModelLoader.configure(state="normal")
         else:
             e6.configure(state="disabled")
             e7.configure(state="disabled")
             e8.configure(state="disabled")
             e9.configure(state="disabled")
+            checkboxPreviousModelLoader.configure(state="disabled")
 
     if (loadPreviousModels.get() == 1):
         e13.configure(state="normal")
+        e14.configure(state="normal")
     else:
         e13.configure(state="disabled")
+        e14.configure(state="disabled")
 
 
 
@@ -79,6 +87,7 @@ e10 = tk.Entry(master)
 e11 = tk.Entry(master)
 e12 = tk.Entry(master)
 e13 = tk.Entry(master)
+e14 = tk.Entry(master)
 tk.Label(master, text='Time prediction').grid(row=7, column=0)
 time_pred = StringVar(master)
 time_pred.set("LSTM")
@@ -100,27 +109,30 @@ d1 = OptionMenu(master, base_model, 'event prediction', 'time prediction', 'time
 d1.grid(row=3, column=1)
 loadPreviousModels = tk.IntVar()
 loadPreviousModels.trace("w", setStates)
-checkboxPreviousModelLoader = tk.Checkbutton(master, text="Load previous LSTM model (specify epoch, default is last)", variable=loadPreviousModels, onvalue=1, offvalue=0, )
+checkboxPreviousModelLoader = tk.Checkbutton(master, text="Load previous LSTM model", variable=loadPreviousModels, onvalue=1, offvalue=0, )
 checkboxPreviousModelLoader.grid(row=11, column = 2)
 e13.configure(state="disabled")
+e14.configure(state="disabled")
 
 
 def User_inputGUI():
 
-    tk.Label(master, text="Give the column names for the following identifiers:").grid(row=13)
+    tk.Label(master, text="Give the column names for the following identifiers").grid(row=13)
     tk.Label(master, text="Unique case ID").grid(row=14, column=0)
     tk.Label(master, text="Event names").grid(row=14, column=1)
     tk.Label(master, text="Event timestamps").grid(row=14, column=2)
     tk.Label(master, text="").grid(row=6)
-    tk.Label(master, text="Give extra column names for features the algorithm should train on for improved performance:").grid(row=17)
+    tk.Label(master, text="Give extra column names for features the algorithm should train on for improved performance").grid(row=17)
     tk.Label(master, text="Number of epochs (integer)").grid(row=11)
     tk.Label(master, text="File name for datasets including extension").grid(row=0, column=0)
     tk.Label(master, text="Training dataset").grid(row=1, column=0)
     tk.Label(master, text="Test dataset").grid(row=1, column=1)
     tk.Label(master, text="Output csv file name").grid(row=1, column=2)
     tk.Label(master, text="Progress of the program will be printed in the console").grid(row=19, column=0)
+    tk.Label(master, text="Load from epoch (default is last)").grid(row=10, column=3)
+    tk.Label(master, text="Continue training from epoch").grid(row=10, column=4)
 
-    global e1, e2, e3, e6, e7, e8, e9, e10, e11, e12, e13, d1, d2, d3, base_model, event_pred, time_pred, epochs
+    global e1, e2, e3, e6, e7, e8, e9, e10, e11, e12, e13, e14, d1, d2, d3, base_model, event_pred, time_pred, epochs
     e10.insert(0, "training.csv")
     e11.insert(0, "test.csv")
     e9.insert(0, epochs)
@@ -140,6 +152,7 @@ def User_inputGUI():
     e11.grid(row=2, column=1)
     e12.grid(row=2, column = 2)
     e13.grid(row=11, column=3)
+    e14.grid(row=11, column=4)
     tk.Button(master, text='Confirm variables', command=master.quit).grid(row=19, column=0, sticky=tk.W, pady=4)
     master.mainloop()
 
@@ -152,11 +165,16 @@ def User_inputGUI():
 base_features, extra_features = User_inputGUI()
 
 loadEpoch = ''
+trainEpoch= ''
 if (loadPreviousModels.get() == 1):
     if e13.get() == '':
         loadEpoch = 0
     else:
         loadEpoch= e13.get()
+    if (e14.get() == ''):
+        trainEpoch = 0
+    else:
+        trainEpoch = e14.get()
 
 # Convert csv into dataframe
 print("Loading datasets")
@@ -181,7 +199,7 @@ print("Finding actual next event and time to next event")
 if "event" in base_model.get():
     if ("LSTM" in event_pred.get()):
         print("Starting training for the LSTM model regarding events")
-        accuracy, df_test = LSTMEvent(df_training, df_validation, df_test, base_features, extra_features, int(e9.get()), loadEpoch)
+        accuracy, df_test = LSTMEvent(df_training, df_validation, df_test, base_features, extra_features, int(e9.get()), loadEpoch, trainEpoch)
         print('The prediction accuracy of the LSTM model for events is: {}%'.format(round(accuracy * 100, 3)))
         print('To visualize and track model\'s graph during training, how tensors over time and much more! \nrun \'tensorboard --logdir jobdir_event/logs\' in terminal.')
     elif ("forest" in event_pred.get()):
@@ -192,7 +210,7 @@ if "event" in base_model.get():
 if "time" in base_model.get():
     if ("LSTM" in time_pred.get()):
         print("Starting training for the LSTM model regarding time")
-        RMSE, df_test = LSTMTime(df_training, df_validation, df_test, base_features, extra_features, int(e9.get()), loadEpoch)
+        RMSE, df_test = LSTMTime(df_training, df_validation, df_test, base_features, extra_features, int(e9.get()), loadEpoch, trainEpoch)
         print('The RMSE of the LSTM model for time is: {} seconds'.format(round(RMSE, 7)))
         print('To visualize and track model\'s graph during training, how tensors over time and much more! \nrun \'tensorboard --logdir jobdir_time/logs\' in terminal.')
     elif ("multi" in time_pred.get()):
