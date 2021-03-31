@@ -28,12 +28,14 @@ def setStates(*args):
             e8.configure(state="normal")
             e9.configure(state="normal")
             checkboxPreviousModelLoader.configure(state="normal")
+            checkboxTrainModelLoader
         else:
             e6.configure(state="disabled")
             e7.configure(state="disabled")
             e8.configure(state="disabled")
             e9.configure(state="disabled")
             checkboxPreviousModelLoader.configure(state="disabled")
+            checkboxTrainModelLoader
     elif ("time" in base_model.get()):
         d3.configure(state="disabled")
         d2.configure(state="normal")
@@ -43,12 +45,14 @@ def setStates(*args):
             e8.configure(state="normal")
             e9.configure(state="normal")
             checkboxPreviousModelLoader.configure(state="normal")
+            checkboxTrainModelLoader.configure(state="normal")
         else:
             e6.configure(state="disabled")
             e7.configure(state="disabled")
             e8.configure(state="disabled")
             e9.configure(state="disabled")
             checkboxPreviousModelLoader.configure(state="disabled")
+            checkboxTrainModelLoader.configure(state="disabled")
     elif ("event" in base_model.get()):
         d2.configure(state="disabled")
         d3.configure(state="normal")
@@ -58,18 +62,23 @@ def setStates(*args):
             e8.configure(state="normal")
             e9.configure(state="normal")
             checkboxPreviousModelLoader.configure(state="normal")
+            checkboxTrainModelLoader.configure(state="normal")
         else:
             e6.configure(state="disabled")
             e7.configure(state="disabled")
             e8.configure(state="disabled")
             e9.configure(state="disabled")
             checkboxPreviousModelLoader.configure(state="disabled")
+            checkboxTrainModelLoader.configure(state="disabled")
 
     if (loadPreviousModels.get() == 1 and ("LSTM" in event_pred.get() or "LSTM" in time_pred.get())):
         e13.configure(state="normal")
-        e14.configure(state="normal")
     else:
         e13.configure(state="disabled")
+
+    if (trainPreviousModels.get() == 1 and ("LSTM" in event_pred.get() or "LSTM" in time_pred.get())):
+        e14.configure(state="normal")
+    else:
         e14.configure(state="disabled")
 
 
@@ -88,6 +97,8 @@ e11 = tk.Entry(master)
 e12 = tk.Entry(master)
 e13 = tk.Entry(master)
 e14 = tk.Entry(master)
+e15 = tk.Entry(master)
+e16 = tk.Entry(master)
 tk.Label(master, text='Time prediction').grid(row=7, column=0)
 time_pred = StringVar(master)
 time_pred.set("LSTM")
@@ -110,27 +121,34 @@ d1.grid(row=3, column=1)
 loadPreviousModels = tk.IntVar()
 loadPreviousModels.trace("w", setStates)
 checkboxPreviousModelLoader = tk.Checkbutton(master, text="Load previous LSTM model", variable=loadPreviousModels, onvalue=1, offvalue=0, )
-checkboxPreviousModelLoader.grid(row=11, column = 2)
+trainPreviousModels = tk.IntVar()
+trainPreviousModels.trace("w", setStates)
+checkboxTrainModelLoader = tk.Checkbutton(master, text="Train previous LSTM model", variable=trainPreviousModels, onvalue=1, offvalue=0, )
+checkboxPreviousModelLoader.grid(row=13, column = 0)
+checkboxTrainModelLoader.grid(row=13, column = 2)
 e13.configure(state="disabled")
 e14.configure(state="disabled")
+e15.configure(state="disabled")
+e16.configure(state="disabled")
+
 
 
 def User_inputGUI():
 
-    tk.Label(master, text="Column names of the following core features").grid(row=13)
-    tk.Label(master, text="Unique case ID").grid(row=14, column=0)
-    tk.Label(master, text="Event names").grid(row=14, column=1)
-    tk.Label(master, text="Event timestamps").grid(row=14, column=2)
+    tk.Label(master, text="Column names of the following core features").grid(row=14)
+    tk.Label(master, text="Unique case ID").grid(row=15, column=0)
+    tk.Label(master, text="Event names").grid(row=15, column=1)
+    tk.Label(master, text="Event timestamps").grid(row=15, column=2)
     tk.Label(master, text="").grid(row=6)
-    tk.Label(master, text="(Optional) Additional Features to train on").grid(row=17)
+    tk.Label(master, text="(Optional) Additional Features to train on").grid(row=18)
     tk.Label(master, text="Max number of epochs to train on \n(integer)").grid(row=11)
     tk.Label(master, text="File name for datasets including extension").grid(row=0, column=0)
     tk.Label(master, text="Training dataset").grid(row=1, column=0)
     tk.Label(master, text="Test dataset").grid(row=1, column=1)
     tk.Label(master, text="Output csv file name").grid(row=1, column=2)
-    tk.Label(master, text="Progress of the program will be printed in the terminal").grid(row=20, column=0)
-    tk.Label(master, text="Specify which epoch (default is last)").grid(row=10, column=3)
-    tk.Label(master, text="Continue training from epoch").grid(row=10, column=4)
+    tk.Label(master, text="Progress of the program will be printed in the terminal").grid(row=21, column=0)
+    tk.Label(master, text="Specify which epoch to load \n(default is last)").grid(row=12, column=1)
+    tk.Label(master, text="Specify from which epoch to continue training \n(default is last)").grid(row=12, column=3)
 
     global e1, e2, e3, e6, e7, e8, e9, e10, e11, e12, e13, e14, d1, d2, d3, base_model, event_pred, time_pred, epochs
     e10.insert(0, "training.csv")
@@ -141,19 +159,20 @@ def User_inputGUI():
     e3.insert(0, "event time:timestamp")
     e12.insert(0, "Output.csv")
 
-    e1.grid(row=15, column=0)
-    e2.grid(row=15, column=1)
-    e3.grid(row=15, column=2)
-    e6.grid(row=18, column=0)
-    e7.grid(row=18, column=1)
-    e8.grid(row=18, column=2)
+    e1.grid(row=16, column=0)
+    e2.grid(row=16, column=1)
+    e3.grid(row=16, column=2)
+    e6.grid(row=19, column=0)
+    e7.grid(row=19, column=1)
+    e8.grid(row=19, column=2)
     e9.grid(row=11, column=1)
     e10.grid(row=2, column=0)
     e11.grid(row=2, column=1)
     e12.grid(row=2, column = 2)
-    e13.grid(row=11, column=3)
-    e14.grid(row=11, column=4)
-    tk.Button(master, text='Confirm variables', command=master.quit).grid(row=19, column=0, sticky=tk.W, ipadx=5, pady=4)
+    e13.grid(row=13, column=1)
+    e14.grid(row=13, column=3)
+
+    tk.Button(master, text='Confirm variables', command=master.quit).grid(row=20, column=0, sticky=tk.W, ipadx=5, pady=4)
     master.mainloop()
 
     base_features = [e1.get(), e2.get(), e3.get()]
@@ -167,15 +186,18 @@ base_features, extra_features = User_inputGUI()
 loadEpoch = ''
 trainEpoch= ''
 if (loadPreviousModels.get() == 1):
-    # if e13.get() == '':
-    #     loadEpoch = 0
-    # else:
-    #     loadEpoch= e13.get()
+    if e13.get() == '':
+        loadEpoch = 0
+    else:
+        loadEpoch= int(e13.get())
+
+if trainPreviousModels.get() == 1:
     if (e14.get() == ''):
         trainEpoch = 0
     else:
-        trainEpoch = e14.get()
+        trainEpoch = int(e14.get())
 
+print(type(loadEpoch))
 # Convert csv into dataframe
 print("Loading datasets")
 df_training_raw = pd.read_csv(dirname + "/data/" + e10.get())

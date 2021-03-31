@@ -30,6 +30,22 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
 
     warnings.filterwarnings("ignore")
 
+    file_prefix = '_'.join(extra_features)
+    FILE_PATH = file_prefix + "_cp-{epoch:04d}.h5"
+
+    if load_epoch != '' or train_epoch != '':
+        if len(os.listdir('jobdir_event')) == 0:
+            raise Exception('Please train a model before trying to load a trained model.')
+        else:
+            for filename in os.listdir('jobdir_event'):
+                try:
+                    if removesuffix(filename, '_cp-0001.h5') == file_prefix:
+                        break
+                    else:
+                        assert removesuffix(filename, '_cp-0001.h5') == file_prefix, 'The model that is loading is trained on different optional features, please check your optional features.'
+                except ValueError:
+                    pass
+
     def model_fn(labels_dim, number_events_mean, unique_training_events):
         """Create a Keras Sequential model with layers."""
         model = tf.keras.Sequential()
@@ -68,26 +84,11 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
         if target_file is None:
             raise ValueError('The given checkpoint is not found.')
         if overwrite:
-            os.rename(os.path.join(checkpoint_dir, target_file), os.path.join(checkpoint_dir, 'cp-0000.h5'))
+            file_path = file_prefix + '_cp-0000.h5'
+            os.rename(os.path.join(checkpoint_dir, target_file), os.path.join(checkpoint_dir, file_path))
             latest = 'cp-0000.h5'
             shutil.rmtree(os.path.join(checkpoint_dir, 'logs')) 
         return os.path.join(checkpoint_dir, latest)
-
-    file_prefix = '_'.join(extra_features) + '_'
-    FILE_PATH = file_prefix + "cp-{epoch:04d}.h5"
-
-    if load_epoch != '':
-        if len(os.listdir('jobdir_event')) == 0:
-            raise Exception('Please train a model before trying to load a trained model.')
-        else:
-            for filename in os.listdir('jobdir_event'):
-                try:
-                    if removesuffix(filename, 'cp-0001.h5') == file_prefix:
-                        break
-                    else:
-                        assert removesuffix(filename, 'cp-0001.h5') == file_prefix, 'The model that is loading is trained on different optional features, please check your optional features.'
-                except ValueError:
-                    pass
         
     LSTM_MODEL = 'lstm.h5'
 
@@ -240,9 +241,10 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
         else:
             print('loading trained LSTM model...')
             lstm_model = model_fn(CLASS_SIZE, number_events_mean, unique_training_events)
-            lstm_model.load_weights(f'./jobdir_event/cp-{load_epoch:04d}.h5')
+            file_path = file_prefix + f'_cp-{load_epoch:04d}.h5'
+            lstm_model.load_weights(os.path.join('jobdir_event', file_path))
             print('Done loading trained LSTM model!')
-                
+
         if train_epoch != '':
             print(train_epoch)
             print('loading trained LSTM model and starts training...')
@@ -265,6 +267,22 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
 def LSTMTime(dataset, validationDataset, applyDataset, core_features, extra_features, epochs, load_epoch, train_epoch):
 
     warnings.filterwarnings("ignore")
+
+    file_prefix = '_'.join(extra_features)
+    FILE_PATH = file_prefix + "_cp-{epoch:04d}.h5"
+
+    if load_epoch != '' or train_epoch != '':
+        if len(os.listdir('jobdir_time')) == 0:
+            raise Exception('Please train a model before trying to load a trained model.')
+        else:
+            for filename in os.listdir('jobdir_time'):
+                try:
+                    if removesuffix(filename, '_cp-0001.h5') == file_prefix:
+                        break
+                    else:
+                        assert removesuffix(filename, '_cp-0001.h5') == file_prefix, 'The model that is loading is trained on different optional features, please check your optional features.'
+                except Exception:
+                    pass
 
     def model_fn(number_events_mean, unique_training_events):
         """Create a Keras Sequential model with layers."""
@@ -301,26 +319,11 @@ def LSTMTime(dataset, validationDataset, applyDataset, core_features, extra_feat
         if target_file is None:
             raise ValueError('The given checkpoint is not found.')
         if overwrite:
-            os.rename(os.path.join(checkpoint_dir, target_file), os.path.join(checkpoint_dir, 'cp-0000.h5'))
+            file_path = file_prefix + '_cp-0000.h5'
+            os.rename(os.path.join(checkpoint_dir, target_file), os.path.join(checkpoint_dir, file_path))
             latest = 'cp-0000.h5'
             shutil.rmtree(os.path.join(checkpoint_dir, 'logs')) 
         return os.path.join(checkpoint_dir, latest)
-
-    file_prefix = '_'.join(extra_features) + '_'
-    FILE_PATH = file_prefix + "cp-{epoch:04d}.h5"
-
-    if load_epoch != '' or train_epoch != '':
-        if len(os.listdir('jobdir_time')) == 0:
-            raise Exception('Please train a model before trying to load a trained model.')
-        else:
-            for filename in os.listdir('jobdir_time'):
-                try:
-                    if removesuffix(filename, 'cp-0001.h5') == file_prefix:
-                        break
-                    else:
-                        assert removesuffix(filename, 'cp-0001.h5') == file_prefix, 'The model that is loading is trained on different optional features, please check your optional features.'
-                except Exception:
-                    pass
         
     LSTM_MODEL = 'lstm.h5'
 
@@ -407,9 +410,6 @@ def LSTMTime(dataset, validationDataset, applyDataset, core_features, extra_feat
     df_validation = validationDataset.copy()
     df_test = applyDataset.copy()
 
-    print('Training LSTM model...')
-    lstm_model, _ = run(removeall=True)
-    print('Done training LSTM model!')
     def eventTimeConverter(inputData):
         inputData["day"] = pd.to_datetime(inputData[core_features[2]]).dt.day % 7
         inputData["hour"] = pd.to_datetime(inputData[core_features[2]]).dt.hour
@@ -463,9 +463,9 @@ def LSTMTime(dataset, validationDataset, applyDataset, core_features, extra_feat
 
     print('Converting input to lstm accepted format...')
     if load_epoch == '' or train_epoch != '':
-        x_train, y_train = eventInputLstm(df_training, core_features, extra_features, encoder_scaler, number_events_mean)
-        x_val, y_val = eventInputLstm(df_validation, core_features, extra_features, encoder_scaler, number_events_mean)
-    x_test, y_test = eventInputLstm(df_test, core_features, extra_features, encoder_scaler, number_events_mean)
+        x_train, y_train = timeInputLstm(df_training, core_features, extra_features, encoder_scaler, number_events_mean)
+        x_val, y_val = timeInputLstm(df_validation, core_features, extra_features, encoder_scaler, number_events_mean)
+    x_test, y_test = timeInputLstm(df_test, core_features, extra_features, encoder_scaler, number_events_mean)
     print('Done converting input to lstm accepted format!')
 
     if load_epoch == '' and train_epoch == '':
@@ -477,13 +477,14 @@ def LSTMTime(dataset, validationDataset, applyDataset, core_features, extra_feat
             pass
         elif load_epoch == 0:
             print('loading trained LSTM model...')
-            lstm_model = model_fn()
-            lstm_model.load_weights('./jobdir_event/lstm.h5')
+            lstm_model = model_fn(number_events_mean, unique_training_events)
+            lstm_model.load_weights('./jobdir_time/lstm.h5')
             print('Done loading trained LSTM model!')
         else:
             print('loading trained LSTM model...')
-            lstm_model = model_fn()
-            lstm_model.load_weights(f'./jobdir_event/cp-{load_epoch:04d}.h5')
+            lstm_model = model_fn(number_events_mean, unique_training_events)
+            file_path = file_prefix + f'_cp-{load_epoch:04d}.h5'
+            lstm_model.load_weights(os.path.join('jobdir_time', file_path))
             print('Done loading trained LSTM model!')
         
         if train_epoch != '':
