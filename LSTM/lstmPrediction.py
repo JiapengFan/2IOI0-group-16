@@ -396,6 +396,9 @@ def LSTMTime(dataset, validationDataset, applyDataset, core_features, extra_feat
     df_validation = validationDataset.copy()
     df_test = applyDataset.copy()
 
+    print('Training LSTM model...')
+    lstm_model, _ = run(removeall=True)
+    print('Done training LSTM model!')
     def eventTimeConverter(inputData):
         inputData["day"] = pd.to_datetime(inputData[core_features[2]]).dt.day % 7
         inputData["hour"] = pd.to_datetime(inputData[core_features[2]]).dt.hour

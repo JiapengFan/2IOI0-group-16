@@ -5,32 +5,73 @@ from preprocessing.dataSplitting import dataSplitter
 from training.decisionTree import dummy_trainers, x_prediction, fit_tree, tree_predict, quick_dummy
 import pandas as pd
 import timeit
+import os
+import pandas as pd
+import numpy as np
+from preprocessing.dataParsing import parseData
+from preprocessing.dataSplitting import dataSplitter
+from training.predictionAlgo import naiveNextEventPredictor, naiveTimeToNextEventPredictor
+from training.MultiVarRegModel import RegModel
+import tkinter as tk
+from tkinter import *
+from LSTM.lstmPrediction import LSTMEvent, LSTMTime
+import warnings
+from training.RandomForestPredictor import run_full_rf
+import os
+
+warnings.filterwarnings("ignore")
+
+dirname = os.path.dirname(__file__)
 
 @profile(precision=4) #place profile before the function, this will return memory use when running the function
 def function():
+
+
+    loadEpoch=""
+    base_features = ["case concept:name", "event concept:name", "event time:timestamp"]
+    extra_features = []
+
     # Convert csv into dataframe
-    df_2012 = pd.read_csv('.\data\BPI2012Training.csv')
-    df_2012_Test = pd.read_csv('.\data\BPI2012Test.csv')
+    print("Loading datasets")
+    df_training_raw = pd.read_csv(dirname + "/data/training.csv")
+    df_test_raw = pd.read_csv(dirname + "/data/test.csv")
+    df_test_columns = df_test_raw.columns
+    # Parsing data
+    print("Parsing and splitting the data")
+    (df_training, df_2012_last_event_per_case_train) = parseData(df_training_raw)
+    (df_test, df_2012_last_event_per_case_test) = parseData(df_test_raw)
 
-    # Parse data
-    (df_training, df_2012_last_event_per_case) = parseData(df_2012)
-    (df_test, df_2012_last_event_per_case_Test) = parseData(df_2012_Test)
-
+    # Clean and split the data into train, validation & test data
     (df_training, df_validation, df_test) = dataSplitter(df_training, df_test)
 
-    #naiveNextEventPredictor(df_2012, df_2012_Test)
-    #naiveTimeToNextEventPredictor(df_2012, df_2012_Test)
-    #naiveAverageTimeOfCasePredictor(df_2012_last_event_per_case)
-    df_training_dummy = quick_dummy(df_training, 'event concept:name')
-    df_test_dummy = quick_dummy(df_test, 'event concept:name')
-    df_validation_dummy = quick_dummy(df_validation, 'event concept:name')
+    # Apply the naive predictors to all the datasets
+    print("Apply naive predictor and find actual next event and time to next event, as well as generating naive predictions")
+    (df_training, df_test) = naiveTimeToNextEventPredictor(df_training, df_test)
+    (df_training, df_test) = naiveNextEventPredictor(df_training, df_test)
+    (df_training, df_validation) = naiveTimeToNextEventPredictor(df_training, df_validation)
+    (df_training, df_validation) = naiveNextEventPredictor(df_training, df_validation)
 
-    # prediction using the decision tree
-    X_train, y_train = dummy_trainers(df_training_dummy)  # current df_training doenst contain dummy variables yet
-    X_validation = x_prediction(df_validation_dummy)
-    X_test = x_prediction(df_test_dummy)
-    decision_boom = fit_tree(X_train, y_train)
-    df_Predictions = tree_predict(X_test, df_test, decision_boom)
+    # Run prediction algorithms associated with input
+    accuracy, df_test = run_full_rf(df_training, df_test, base_features)
+    accuracy, df_test = LSTMEvent(df_training, df_validation, df_test, base_features, extra_features, int(10))
+    RMSE, df_test = LSTMTime(df_training, df_validation, df_test, base_features, extra_features, int(10))
+    RMSE, df_test = RegModel(df_training, df_test, base_features)
+
+    for x in df_test.columns:
+        if (x not in df_test_columns):
+            if not (x == "timePrediction" or x == "eventPrediction" or x == "naive_predicted_time_to_next_event" or x == "naive_predicted_next_event"):
+                df_test.drop(columns=x, inplace=True)
+
+    #if ("naive" in time_pred.get()):
+        #df_test.drop(columns="naive_predicted_time_to_next_event", inplace=True)
+    #if ("naive" in event_pred.get()):
+        #df_test.drop(columns="naive_predicted_next_event", inplace=True)
+
+    print("Outputting csv file")
+    print(df_test.head(10))
+    df_test.to_csv(dirname + "/output/output.csv", index=False)
+    print("CSV file is outputted to: ", dirname + "/output/output.csv")
+    print("Finished processing request!!")
 
 
 starttime = timeit.default_timer()
