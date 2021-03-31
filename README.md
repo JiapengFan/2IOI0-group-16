@@ -21,9 +21,9 @@ The input fields that can be filled in the recommended order are
   6. Give the column names for the three identifiers as shown in the tool. The model will be training on these three features at any rate.
   7. (optional) Give extra features that you wish the model to train on.
 
-# Play with different combinations of extra features, we challenge you to beat the accuracy yielded by only training on the core features!
+#### Play with different combinations of extra features, we challenge you to beat the accuracy yielded by only training on the core features!
 
 The tool will then print progress messages in the terminal.
 When you see 'Finished processing request!!'. The tool will terminate and the output csv can be found in output/"name given in input field 2"
 
-# Enjoy using the tool!!
+#### Enjoy using the tool!!
