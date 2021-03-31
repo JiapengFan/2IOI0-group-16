@@ -100,25 +100,25 @@ d1 = OptionMenu(master, base_model, 'event prediction', 'time prediction', 'time
 d1.grid(row=3, column=1)
 loadPreviousModels = tk.IntVar()
 loadPreviousModels.trace("w", setStates)
-checkboxPreviousModelLoader = tk.Checkbutton(master, text="Load previous LSTM model (specify epoch, default is last)", variable=loadPreviousModels, onvalue=1, offvalue=0, )
+checkboxPreviousModelLoader = tk.Checkbutton(master, text="(Optional) Load previous LSTM model \n(specify epoch, default is last)", variable=loadPreviousModels, onvalue=1, offvalue=0, )
 checkboxPreviousModelLoader.grid(row=11, column = 2)
 e13.configure(state="disabled")
 
 
 def User_inputGUI():
 
-    tk.Label(master, text="Give the column names for the following identifiers:").grid(row=13)
+    tk.Label(master, text="Column names of the following core features").grid(row=13)
     tk.Label(master, text="Unique case ID").grid(row=14, column=0)
     tk.Label(master, text="Event names").grid(row=14, column=1)
     tk.Label(master, text="Event timestamps").grid(row=14, column=2)
     tk.Label(master, text="").grid(row=6)
-    tk.Label(master, text="Give extra column names for features the algorithm should train on for improved performance:").grid(row=17)
-    tk.Label(master, text="Number of epochs (integer)").grid(row=11)
+    tk.Label(master, text="(Optional) Additional Features to train on").grid(row=17)
+    tk.Label(master, text="Max number of epochs to train on \n(integer)").grid(row=11)
     tk.Label(master, text="File name for datasets including extension").grid(row=0, column=0)
     tk.Label(master, text="Training dataset").grid(row=1, column=0)
     tk.Label(master, text="Test dataset").grid(row=1, column=1)
     tk.Label(master, text="Output csv file name").grid(row=1, column=2)
-    tk.Label(master, text="Progress of the program will be printed in the console").grid(row=19, column=0)
+    tk.Label(master, text="Progress of the program will be printed in the terminal").grid(row=20, column=0)
 
     global e1, e2, e3, e6, e7, e8, e9, e10, e11, e12, e13, d1, d2, d3, base_model, event_pred, time_pred, epochs
     e10.insert(0, "training.csv")
@@ -140,7 +140,7 @@ def User_inputGUI():
     e11.grid(row=2, column=1)
     e12.grid(row=2, column = 2)
     e13.grid(row=11, column=3)
-    tk.Button(master, text='Confirm variables', command=master.quit).grid(row=19, column=0, sticky=tk.W, pady=4)
+    tk.Button(master, text='Confirm variables', command=master.quit).grid(row=19, column=0, sticky=tk.W, ipadx=5, pady = 4)
     master.mainloop()
 
     base_features = [e1.get(), e2.get(), e3.get()]

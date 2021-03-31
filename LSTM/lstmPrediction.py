@@ -156,9 +156,7 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
             write_graph=True,
             embeddings_freq=0)
 
-        #     #implemented earlystopping
-        #     callbacks = [checkpoint, tblog, keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=6)]
-
+        #implemented earlystopping
         callbacks = [checkpoint, tblog, tf.keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=4)]
 
         history = lstm_model.fit(
