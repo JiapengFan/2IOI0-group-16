@@ -128,7 +128,7 @@ def User_inputGUI():
     tk.Label(master, text="Training dataset").grid(row=1, column=0)
     tk.Label(master, text="Test dataset").grid(row=1, column=1)
     tk.Label(master, text="Output csv file name").grid(row=1, column=2)
-    tk.Label(master, text="Progress of the program will be printed in the terminal").grid(row=19, column=0)
+    tk.Label(master, text="Progress of the program will be printed in the terminal").grid(row=20, column=0)
     tk.Label(master, text="Specify which epoch (default is last)").grid(row=10, column=3)
     tk.Label(master, text="Continue training from epoch").grid(row=10, column=4)
 
