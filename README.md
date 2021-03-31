@@ -15,9 +15,13 @@ The input fields that can be filled in the recommended order are
   3. Whether you want to make use of event or time prediction or both.
   4. Select the algorithm you want to apply.
   5. If LSTM is selected as the prediction algorithm, otherwise skip 5 
-      i. The max number of epoch you wish to train on can be provided.
-      ii. (optional) Load a trained model to apply the test dataset.
-      iii. (optional) Load a trained model and will be trained for the max number of epochs given in i.
+     
+    i. The max number of epoch you wish to train on can be provided.
+    
+    ii. (optional) Load a trained model to apply the test dataset.
+    
+    iii. (optional) Load a trained model and will be trained for the max number of epochs given in i.
+    
   6. Give the column names for the three identifiers as shown in the tool. The model will be training on these three features at any rate.
   7. (optional) Give extra features that you wish the model to train on.
 
