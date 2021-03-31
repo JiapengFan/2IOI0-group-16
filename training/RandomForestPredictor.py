@@ -103,7 +103,7 @@ def run_full_rf(data_train, data_test, features):
 
     acc = 0
     for i in final_df.index:
-        if final_df['predicted_event'][i] == final_df['actual_next_event'][i]:
+        if final_df['eventPrediction'][i] == final_df['actual_next_event'][i]:
             acc += 1
 
     accuracy = acc/(len(final_df) - 1)
