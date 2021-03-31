@@ -6,7 +6,7 @@ from training.predictionAlgo import naiveNextEventPredictor, naiveTimeToNextEven
 from training.MultiVarRegModel import RegModel
 import tkinter as tk
 from tkinter import *
-from LSTM.lstmPrediction import LSTMEvent, LSTMTime
+from training.lstmPrediction import LSTMEvent, LSTMTime
 import warnings
 from training.RandomForestPredictor import run_full_rf
 import os
@@ -28,14 +28,15 @@ def setStates(*args):
             e8.configure(state="normal")
             e9.configure(state="normal")
             checkboxPreviousModelLoader.configure(state="normal")
-            checkboxTrainModelLoader
+            checkboxTrainModelLoader.configure(state="normal")
+            print("KK")
         else:
             e6.configure(state="disabled")
             e7.configure(state="disabled")
             e8.configure(state="disabled")
             e9.configure(state="disabled")
             checkboxPreviousModelLoader.configure(state="disabled")
-            checkboxTrainModelLoader
+            checkboxTrainModelLoader.configure(state="disabled")
     elif ("time" in base_model.get()):
         d3.configure(state="disabled")
         d2.configure(state="normal")
@@ -70,6 +71,18 @@ def setStates(*args):
             e9.configure(state="disabled")
             checkboxPreviousModelLoader.configure(state="disabled")
             checkboxTrainModelLoader.configure(state="disabled")
+
+    if (loadPreviousModels.get() == 1):
+        checkboxPreviousModelLoader.configure(state="normal")
+        checkboxTrainModelLoader.configure(state="disabled")    
+    elif (trainPreviousModels.get() == 1):
+        checkboxTrainModelLoader.configure(state="normal")
+        checkboxPreviousModelLoader.configure(state="disabled")
+    elif  ("LSTM" in event_pred.get() or "LSTM" in time_pred.get()):
+        checkboxTrainModelLoader.configure(state="normal")
+        checkboxPreviousModelLoader.configure(state="normal")
+    
+    #if ()
 
     if (loadPreviousModels.get() == 1 and ("LSTM" in event_pred.get() or "LSTM" in time_pred.get())):
         e13.configure(state="normal")
@@ -130,8 +143,6 @@ e13.configure(state="disabled")
 e14.configure(state="disabled")
 e15.configure(state="disabled")
 e16.configure(state="disabled")
-
-
 
 def User_inputGUI():
 
@@ -197,7 +208,6 @@ if trainPreviousModels.get() == 1:
     else:
         trainEpoch = int(e14.get())
 
-print(type(loadEpoch))
 # Convert csv into dataframe
 print("Loading datasets")
 df_training_raw = pd.read_csv(dirname + "/data/" + e10.get())
@@ -213,32 +223,32 @@ print("Parsing and splitting the data")
 
 # Apply the naive predictors to all the datasets
 print("Finding actual next event and time to next event")
-(df_training, df_test) = naiveTimeToNextEventPredictor(df_training, df_test)
-(df_training, df_test) = naiveNextEventPredictor(df_training, df_test)
-(df_training, df_validation) = naiveTimeToNextEventPredictor(df_training, df_validation)
-(df_training, df_validation) = naiveNextEventPredictor(df_training, df_validation)
+(df_training, df_test) = naiveTimeToNextEventPredictor(df_training, df_test, base_features)
+(df_training, df_test) = naiveNextEventPredictor(df_training, df_test, base_features)
+(df_training, df_validation) = naiveTimeToNextEventPredictor(df_training, df_validation, base_features)
+(df_training, df_validation) = naiveNextEventPredictor(df_training, df_validation, base_features)
 
 if "event" in base_model.get():
     if ("LSTM" in event_pred.get()):
         print("Starting training for the LSTM model regarding events")
         accuracy, df_test = LSTMEvent(df_training, df_validation, df_test, base_features, extra_features, int(e9.get()), loadEpoch, trainEpoch)
-        print('The prediction accuracy of the LSTM model for events is: {}%'.format(round(accuracy * 100, 3)))
+        print('The prediction accuracy of the LSTM model for events is: {}%'.format(round(accuracy * 100, 1)))
         print('To visualize and track model\'s graph during training, how tensors over time and much more! \nrun \'tensorboard --logdir jobdir_event/logs\' in terminal.')
     elif ("forest" in event_pred.get()):
         print("Starting training for random forest regarding events")
         accuracy, df_test = run_full_rf(df_training, df_test, base_features)
-        print('The prediction accuracy of random forest for events is: {}%'.format(round(accuracy * 100, 3)))
+        print('The prediction accuracy of random forest for events is: {}%'.format(round(accuracy * 100, 1)))
         
 if "time" in base_model.get():
     if ("LSTM" in time_pred.get()):
         print("Starting training for the LSTM model regarding time")
         RMSE, df_test = LSTMTime(df_training, df_validation, df_test, base_features, extra_features, int(e9.get()), loadEpoch, trainEpoch)
-        print('The RMSE of the LSTM model for time is: {} seconds'.format(round(RMSE, 7)))
+        print('The RMSE of the LSTM model for time is: {} seconds'.format(round(RMSE, 0)))
         print('To visualize and track model\'s graph during training, how tensors over time and much more! \nrun \'tensorboard --logdir jobdir_time/logs\' in terminal.')
-    elif ("multi" in time_pred.get()):
+    elif ("Multi" in time_pred.get()):
         print("Starting training for the multivariate regression model regarding time")
         RMSE, df_test = RegModel(df_training, df_test, base_features)
-        print('The RMSE of the multivariate regression model for time is: {} seconds'.format(round(RMSE, 7)))
+        print('The RMSE of the multivariate regression model for time is: {} seconds'.format(round(RMSE, 0)))
 
 print(df_test.head(10))
 
@@ -247,7 +257,7 @@ for x in df_test.columns:
         if not (x == "timePrediction" or x == "eventPrediction" or x == "naive_predicted_time_to_next_event" or x == "naive_predicted_next_event"):
             df_test.drop(columns=x, inplace=True)
     
-print("Outputting csv file")
+print("Outputting csv file to: " + (dirname + "/output/" + e12.get()))
 df_test.to_csv(dirname + "/output/" + e12.get(), index=False)
 print("Finished processing request!!")
 master.destroy()
