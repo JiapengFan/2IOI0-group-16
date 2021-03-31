@@ -85,7 +85,6 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
                     if removesuffix(filename, 'cp-0001.h5') == file_prefix:
                         break
                     else:
-                        print('Im here')
                         assert removesuffix(filename, 'cp-0001.h5') == file_prefix, 'The model that is loading is trained on different optional features, please check your optional features.'
                 except ValueError:
                     pass
@@ -126,14 +125,23 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
         checkpoint_path = os.path.join(job_dir, checkpoint_path)
 
         lstm_model = model_fn(CLASS_SIZE, number_events_mean, unique_training_events)
-        if epoch_to_train == 0:
-            path = os.path.join(job_dir, 'lstm.h5')
-            lstm_model.load_weights(path)
 
-        if removeall or epoch_to_train == 0:
+        if removeall:
             for filename in os.listdir(job_dir):
                 try:
                     os.remove(os.path.join(job_dir, filename))
+                except:
+                    shutil.rmtree(os.path.join(job_dir, filename))
+        elif epoch_to_train == 0:
+            for filename in os.listdir(job_dir):
+                try:
+                    if filename != 'lstm.h5':
+                        os.remove(os.path.join(job_dir, filename))
+                    else:
+                        os.rename(os.path.join(job_dir, 'lstm.h5'), os.path.join(job_dir, 'cp-0000.h5'))
+                        latest = 'cp-0000.h5'
+                        path = os.path.join(job_dir, latest)
+                        lstm_model.load_weights(path)
                 except:
                     shutil.rmtree(os.path.join(job_dir, filename))
         else:
@@ -209,7 +217,7 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
     number_events_mean = ceil(number_events_mean)
 
     print('Converting input to lstm accepted format...')
-    if (load_epoch == ''):
+    if load_epoch == '' or train_epoch != '':
         x_train, y_train = eventInputLstm(df_training, core_features, extra_features, encoder_scaler, number_events_mean)
         x_val, y_val = eventInputLstm(df_validation, core_features, extra_features, encoder_scaler, number_events_mean)
     x_test, y_test = eventInputLstm(df_test, core_features, extra_features, encoder_scaler, number_events_mean)
@@ -222,7 +230,9 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
         lstm_model, _ = run(unique_training_events, removeall=True, number_events_mean=number_events_mean)
         print('Done training LSTM model!')
     else:
-        if load_epoch == 0:
+        if load_epoch == '':
+            pass
+        elif load_epoch == 0:
             print('loading trained LSTM model...')
             lstm_model = model_fn(CLASS_SIZE, number_events_mean, unique_training_events)
             lstm_model.load_weights('./jobdir_event/lstm.h5')
@@ -234,6 +244,7 @@ def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, ex
             print('Done loading trained LSTM model!')
                 
         if train_epoch != '':
+            print(train_epoch)
             print('loading trained LSTM model and starts training...')
             lstm_model, _ = run(unique_training_events, epoch_to_train=train_epoch, number_events_mean=number_events_mean)
             print('Done loading trained LSTM model and finished training!')
@@ -451,10 +462,10 @@ def LSTMTime(dataset, validationDataset, applyDataset, core_features, extra_feat
     number_events_mean = ceil(number_events_mean)
 
     print('Converting input to lstm accepted format...')
-    if (load_epoch == ''):
-        x_train, y_train = timeInputLstm(df_training, core_features, extra_features, encoder_scaler, number_events_mean)
-        x_val, y_val = timeInputLstm(df_validation, core_features, extra_features, encoder_scaler, number_events_mean)
-    x_test, y_test = timeInputLstm(df_test, core_features, extra_features, encoder_scaler, number_events_mean)
+    if load_epoch == '' or train_epoch != '':
+        x_train, y_train = eventInputLstm(df_training, core_features, extra_features, encoder_scaler, number_events_mean)
+        x_val, y_val = eventInputLstm(df_validation, core_features, extra_features, encoder_scaler, number_events_mean)
+    x_test, y_test = eventInputLstm(df_test, core_features, extra_features, encoder_scaler, number_events_mean)
     print('Done converting input to lstm accepted format!')
 
     if load_epoch == '' and train_epoch == '':
@@ -462,7 +473,9 @@ def LSTMTime(dataset, validationDataset, applyDataset, core_features, extra_feat
         lstm_model, _ = run(unique_training_events, removeall=True, number_events_mean=number_events_mean)
         print('Done training LSTM model!')
     else:
-        if load_epoch == 0:
+        if load_epoch == '':
+            pass
+        elif load_epoch == 0:
             print('loading trained LSTM model...')
             lstm_model = model_fn()
             lstm_model.load_weights('./jobdir_event/lstm.h5')
@@ -477,7 +490,6 @@ def LSTMTime(dataset, validationDataset, applyDataset, core_features, extra_feat
             print('loading trained LSTM model and starts training...')
             lstm_model, _ = run(unique_training_events, epoch_to_train=train_epoch, number_events_mean=number_events_mean)
             print('Done loading trained LSTM model and finished training!')
-
 
     predictions = lstm_model.predict(x_test)
     predictions_unscaled = time_to_next_scaler.inverse_transform(predictions)
