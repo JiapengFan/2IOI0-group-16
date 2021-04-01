@@ -4,4 +4,4 @@ data/BPI2012Test.csv
 .vscode/
 __pycache__/
 jobdir*/
-ouput/
+output/
