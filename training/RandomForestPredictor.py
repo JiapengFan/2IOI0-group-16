@@ -16,6 +16,7 @@ def run_full_rf(data_train, data_test, features):
     df_test = data_test.rename(columns={features[0]: 'case concept:name', features[1]: 'event concept:name',
                                features[2]: 'event time:timestamp'})
 
+    print("Applying one hot encoding to dataframes")
     current_unique = df_training['event concept:name'].unique()
     next_unique = df_training['actual_next_event'].unique()
     unique_training_events = np.append(next_unique, np.setdiff1d(current_unique, next_unique, assume_unique=True)).reshape(-1, 1)
@@ -80,13 +81,16 @@ def run_full_rf(data_train, data_test, features):
     #(df_training, df_validation) = naiveNextEventPredictor(df_training, df_validation)
     #(df_test, df_validation) = naiveNextEventPredictor(df_test, df_validation)
 
+    print("Create input for random forest algorithm")
     x_train, y_train = createInputRF(df_training)
     x_test, y_test = createInputRF(df_test)
 
+    print("Train the random forest on input data")
     rf = RandomForestClassifier(n_estimators=400, min_samples_split=0.02, min_samples_leaf=0.02, max_depth=200,
                                 max_features='sqrt', bootstrap=True)
     rf.fit(x_train, y_train)
 
+    print("Making predictions based on random forest")
     predictions = rf.predict(x_test)
 
     #cols1 = df_training['event concept:name'].unique()

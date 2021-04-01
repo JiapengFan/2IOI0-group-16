@@ -15,9 +15,11 @@ def RegModel(df_training, df_test, coreFeatures):
         inputData["hour"] = pd.to_datetime(inputData[coreFeatures[2]]).dt.hour
         return inputData
 
+    print("Calculating hour of day for event and adding it to the dataset")
     df_training = eventTimeConverter(df_training)
     df_test = eventTimeConverter(df_test)
 
+    print("Applying one hot encoding to the events")
     for x in df_training[coreFeatures[1]].unique():
         df_training[x] = 0
         df_test[x] = 0
@@ -31,12 +33,14 @@ def RegModel(df_training, df_test, coreFeatures):
     x_train = df_training[predictors].copy()
     y_train = df_training[['actual_time_to_next_event']].copy()
 
+    print("Fitting the training data for the linear regression model")
     model = LinearRegression().fit(x_train, y_train)
     R2 = model.score(x_train, y_train)
 
     x_test = df_test[predictors].copy()
     y_test = df_test[['actual_time_to_next_event']].copy()
 
+    print("Making predictions on test dataset with the linear regression model")
     time_pred = model.predict(x_test)
     y_test['predicted_time'] = time_pred
 

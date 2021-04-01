@@ -35,8 +35,8 @@ using the "cd .." and the "cd FOLDER_TO_ENTER" commands. Once in the folder cont
 A GUI will show up.
 The input fields that can be filled in, in recommended order are:
 
-1. Path to training and test data set from the root.
-2. The name of your output csv file containing the predicted and actual result.
+1. File names (including extensions) of train and test datasets, these files must be inside the data folder.
+2. The name of your output csv file containing the predicted and actual result, this file will be outputted to the output folder.
 3. Whether you want to make use of event or time prediction or both.
 4. Select the algorithm you want to apply.
 5. If LSTM is selected as the prediction algorithm, otherwise skip 5
