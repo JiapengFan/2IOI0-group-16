@@ -231,12 +231,12 @@ if "event" in base_model.get():
     if ("LSTM" in event_pred.get()):
         print("Starting training for the LSTM model regarding events")
         accuracy, df_test = LSTMEvent(df_training, df_validation, df_test, base_features, extra_features, int(e9.get()), loadEpoch, trainEpoch)
-        print('The prediction accuracy of the LSTM model for events is: {}%'.format(round(accuracy * 100, 1)))
+        print('The prediction accuracy of the LSTM model for events is: {} %'.format(round(accuracy * 100, 1)))
         print('To visualize and track model\'s graph during training, how tensors over time and much more! \nrun \'tensorboard --logdir jobdir_event/logs\' in terminal.')
     elif ("forest" in event_pred.get()):
         print("Starting training for random forest regarding events")
         accuracy, df_test = run_full_rf(df_training, df_test, base_features)
-        print('The prediction accuracy of random forest for events is: {}%'.format(round(accuracy * 100, 1)))
+        print('The prediction accuracy of random forest for events is: {} %'.format(round(accuracy * 100, 1)))
         
 if "time" in base_model.get():
     if ("LSTM" in time_pred.get()):
@@ -249,12 +249,12 @@ if "time" in base_model.get():
         RMSE, df_test = RegModel(df_training, df_test, base_features)
         print('The RMSE of the multivariate regression model for time is: {} seconds'.format(round(RMSE, 0)))
 
-print(df_test.head(10))
-
 for x in df_test.columns:
     if (x not in df_test_columns):
         if not (x == "timePrediction" or x == "eventPrediction" or x == "naive_predicted_time_to_next_event" or x == "naive_predicted_next_event"):
             df_test.drop(columns=x, inplace=True)
+
+print(df_test.head(10))
     
 print("Outputting csv file to: " + (dirname + "/output/" + e12.get()))
 df_test.to_csv(dirname + "/output/" + e12.get(), index=False)

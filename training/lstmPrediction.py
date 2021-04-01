@@ -27,6 +27,7 @@ def removesuffix(input_string, suffix):
         raise ValueError()
 
 def LSTMEvent(df_training, df_validation, df_test, core_features_input: list, extra_features: list, epochs, load_epoch, train_epoch):
+    extra_features.append("unix_rel_event_time")
 
     warnings.filterwarnings("ignore")
 
