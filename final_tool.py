@@ -13,7 +13,7 @@ import os
 
 warnings.filterwarnings("ignore")
 
-dirname = os.path.dirname(__file__)
+dirname = os.path.dirname(os.path.abspath(__file__))
 base_model = ""
 epochs = 10
 
@@ -29,7 +29,6 @@ def setStates(*args):
             e9.configure(state="normal")
             checkboxPreviousModelLoader.configure(state="normal")
             checkboxTrainModelLoader.configure(state="normal")
-            print("KK")
         else:
             e6.configure(state="disabled")
             e7.configure(state="disabled")

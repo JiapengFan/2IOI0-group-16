@@ -2,23 +2,38 @@
 
 ### Instruction virtual/python environment
 
+There are several prerequisites to gete everything working as intended. The tool could possibly function without these, but this makes setup easier.
+An setup guide without VS Code is also included, but this is more technical
+These prerequisites are:
+
+- Anaconda3
+- (Optional, but highly recommended) VS Code
+
+### Mandatory for any setup:
+
 For the tool to work correctly, many different python packages are required. To set this up, we will need Anaconda3 and the provided requirements.yml file in the main folder.
 Start by opening Anaconda3 and head over to environments on the left side. On the bottom press the import button and use the folder icon and navigate to the requirements.yml file.
 Give the environment a suiting name and click import, this could possibly take several minutes.
+Continue with the section of either Installation with VS Code or the section on Installation without VS Code, as per your preference.
 
-After setting up the environment go to the home section in Anaconda3 and make sure the newly created environment is selected in the dropdown menu from the top.
-When it is launch, or possibly install and then launch, VS Code. In VS Code open the final_tool.py file that is in the main folder.
+### Installation with VS Code
 
+After setting up the environment go to the home tab on the left side and launch, or possibly install and then launch, VS Code.
 The final step is to make sure that VS Code uses the newly created environment. To do this, click on the bottom left of VS Code where it says Python 3.VERSION.
 This will open a menu in the middle of the screen with different Python environments. Select Python 3.6.13 64-bit ('YOUR ENVIRONMENT NAME': conda)".
 Now everything is properly set up to work with the tool.
 
-To run the tool, press the green run tool button on the top right. Continue with the next section.
+To run the tool, press the green run tool button on the top right. Continue with the section on using the tool.
+
+### Installation without VS Code
+
+In the left column, press the arrow button associated with the newly created environment and press "open terminal". Navigate to the folder containing the final_tool.py file
+using the "cd .." and the "cd FOLDER_TO_ENTER" commands. Once in the folder containing the final_tool.py file run the following command "python final_tool.py". Continue with the section on using the tool.
 
 ### Using the tool
 
 A GUI will show up.
-The input fields that can be filled in the recommended order are
+The input fields that can be filled in, in recommended order are:
 
 1. Path to training and test data set from the root.
 2. The name of your output csv file containing the predicted and actual result.
