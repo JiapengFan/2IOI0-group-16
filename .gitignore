@@ -1,4 +1,7 @@
 .venv/
-data/
+data/BPI2012Training.csv
+data/BPI2012Test.csv
+.vscode/
 __pycache__/
 jobdir*/
+ouput/
