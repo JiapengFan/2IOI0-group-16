@@ -9,6 +9,10 @@ Give the environment a suiting name and click import, this could possibly take s
 After setting up the environment go to the home section in Anaconda3 and make sure the newly created environment is selected in the dropdown menu from the top.
 When it is launch, or possibly install and then launch, VS Code. In VS Code open the final_tool.py file that is in the main folder.
 
+The final step is to make sure that VS Code uses the newly created environment. To do this, click on the bottom left of VS Code where it says Python 3.VERSION.
+This will open a menu in the middle of the screen with different Python environments. Select Python 3.6.13 64-bit ('YOUR ENVIRONMENT NAME': conda)".
+Now everything is properly set up to work with the tool.
+
 To run the tool, press the green run tool button on the top right. Continue with the next section.
 
 ### Using the tool
