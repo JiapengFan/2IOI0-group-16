@@ -233,12 +233,12 @@ if "event" in base_model.get():
         accuracy, df_test = LSTMEvent(df_training, df_validation, df_test, base_features, extra_features, int(e9.get()), loadEpoch, trainEpoch)
         print('The prediction accuracy of the LSTM model for events is: {}%'.format(round(accuracy * 100, 1)))
         print('To visualize and track model\'s graph during training, how tensors over time and much more! \nrun \'tensorboard --logdir jobdir_event/logs\' in terminal.\n')
-        print(u'\u2500' * 250)
+        print(u'\u2500' * 210)
     elif ("forest" in event_pred.get()):
         print("Starting training for random forest regarding events")
         accuracy, df_test = run_full_rf(df_training, df_test, base_features)
         print('The prediction accuracy of random forest for events is: {}\n%'.format(round(accuracy * 100, 1)))
-        print(u'\u2500' * 250)
+        print(u'\u2500' * 210)
 
 if "time" in base_model.get():
     if ("LSTM" in time_pred.get()):
@@ -246,13 +246,13 @@ if "time" in base_model.get():
         RMSE, df_test = LSTMTime(df_training, df_validation, df_test, base_features, extra_features, int(e9.get()), loadEpoch, trainEpoch)
         print('The RMSE of the LSTM model for time is: {} seconds'.format(round(RMSE, 1)))
         print('To visualize and track model\'s graph during training, how tensors over time and much more! \nrun \'tensorboard --logdir jobdir_time/logs\' in terminal.\n')
-        print(u'\u2500' * 250)
+        print(u'\u2500' * 210)
     elif ("Multi" in time_pred.get()):
         print("Starting training for the multivariate regression model regarding time")
         RMSE, df_test, R2 = RegModel(df_training, df_test, base_features)
         print('The R2 of the multivariate regression model for time is: {} seconds\n'.format(round(R2, 1)))
         print('The RMSE of the multivariate regression model for time is: {} seconds\n'.format(round(RMSE, 1)))
-        print(u'\u2500' * 250)
+        print(u'\u2500' * 210)
 
 for x in df_test.columns:
     if (x not in df_test_columns):
