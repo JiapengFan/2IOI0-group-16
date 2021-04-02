@@ -46,4 +46,4 @@ def RegModel(df_training, df_test, coreFeatures):
 
     RMSE = sqrt(metrics.mean_squared_error(y_test['actual_time_to_next_event'], y_test['predicted_time']))
     df_test["timePrediction"] = time_pred
-    return (RMSE, df_test)
+    return (RMSE, df_test, R2)
