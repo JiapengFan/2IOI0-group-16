@@ -35,7 +35,7 @@ def RegModel(df_training, df_test, coreFeatures):
 
     print("Fitting the training data for the linear regression model")
     model = LinearRegression().fit(x_train, y_train)
-    R2 = model.score(x_train, y_train)
+    R2 = model.score(x_train, y_train) * 100
 
     x_test = df_test[predictors].copy()
     y_test = df_test[['actual_time_to_next_event']].copy()

@@ -244,14 +244,14 @@ if "time" in base_model.get():
     if ("LSTM" in time_pred.get()):
         print("Starting training for the LSTM model regarding time")
         RMSE, df_test = LSTMTime(df_training, df_validation, df_test, base_features, extra_features, int(e9.get()), loadEpoch, trainEpoch)
-        print('The RMSE of the LSTM model for time is: {} seconds'.format(round(RMSE, 1)))
+        print('The RMSE of the LSTM model for time is: {} seconds'.format(round(RMSE, 0)))
         print('To visualize and track model\'s graph during training, how tensors over time and much more! \nrun \'tensorboard --logdir jobdir_time/logs\' in terminal.\n')
         print(u'\u2500' * 210)
     elif ("Multi" in time_pred.get()):
         print("Starting training for the multivariate regression model regarding time")
         RMSE, df_test, R2 = RegModel(df_training, df_test, base_features)
-        print('The R2 of the multivariate regression model for time is: {} seconds\n'.format(round(R2, 1)))
-        print('The RMSE of the multivariate regression model for time is: {} seconds\n'.format(round(RMSE, 1)))
+        print('The R2 of the multivariate regression model for time is: {}%'.format(round(R2, 1)))
+        print('The RMSE of the multivariate regression model for time is: {} seconds\n'.format(round(RMSE, 0)))
         print(u'\u2500' * 210)
 
 for x in df_test.columns:

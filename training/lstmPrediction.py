@@ -2,22 +2,15 @@ import os
 import shutil
 import tensorflow as tf
 import numpy as np
-from tensorflow import keras
-from keras.layers import Dense, LSTM
-from keras.layers import Dropout
-from keras.models import Sequential
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import mean_squared_error
 from math import ceil
 import math
 from .lstmInput import eventInputLstm, timeInputLstm
-import matplotlib.pyplot as plt
 import warnings
 import numpy as np
-import datetime as dt
 import pandas as pd
-import keras
 import re
 
 def removesuffix(input_string, suffix):
